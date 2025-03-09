@@ -2,7 +2,7 @@ import User from "../models/user";
 
 export const authFunction = async (req, res) => {
   try {
-    const { email_address, image_url } = req.body;
+    const { email_address, clerkId } = req.body;
     const { role } = req.params;
 
     const email = email_address[0].email_address;
@@ -16,8 +16,7 @@ export const authFunction = async (req, res) => {
       } else {
         const newUser = new User({
           email: email,
-          clerkId: email,
-          imageUrl: image_url,
+          clerkId: clerkId,
           role: role,
         });
 
