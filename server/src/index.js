@@ -11,7 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use("/auth", authRoute);
+app.use("/api/auth", authRoute);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
