@@ -2,10 +2,9 @@ import User from "../models/user";
 
 export const authFunction = async (req, res) => {
   try {
-    const { email_address, clerkId } = req.body;
-    const { role } = req.params;
+    const { email_addresses, id } = req.json();
 
-    const email = email_address[0].email_address;
+    const email = email_addresses[0].email_address;
 
     await User.findOne({ email: email }, async (error, user) => {
       if (error) {
@@ -16,7 +15,7 @@ export const authFunction = async (req, res) => {
       } else {
         const newUser = new User({
           email: email,
-          clerkId: clerkId,
+          clerkId: id,
           role: role,
         });
 
