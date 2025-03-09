@@ -133,7 +133,7 @@ const Home: React.FC = () => {
               cursor: "pointer",
             }}
           >
-            <X />
+            <X color="black" />
           </button>
         </div>
 
