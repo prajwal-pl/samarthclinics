@@ -4,9 +4,18 @@ import App from "./App.tsx";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./js/main";
 import { BrowserRouter } from "react-router";
+import { ClerkProvider } from "@clerk/clerk-react";
+
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error("Missing Publishable Key");
+}
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
-    <App />
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+      <App />
+    </ClerkProvider>
   </BrowserRouter>
 );
