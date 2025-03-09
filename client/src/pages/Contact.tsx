@@ -1,4 +1,37 @@
+import { useEffect, useRef } from "react";
+import Typed from "typed.js";
+import AOS from "aos";
+
 const Contact = () => {
+  const typedRef = useRef<HTMLSpanElement>(null);
+  const typed = useRef<Typed | null>(null);
+
+  useEffect(() => {
+    // Initialize AOS
+    AOS.init({
+      duration: 1000,
+      once: true,
+    });
+
+    // Initialize Typed.js
+    if (typedRef.current) {
+      typed.current = new Typed(typedRef.current, {
+        strings: ["संपर्क में रहें"],
+        typeSpeed: 80,
+        backSpeed: 80,
+        backDelay: 4000,
+        startDelay: 1000,
+        loop: true,
+        showCursor: true,
+      });
+    }
+
+    // Cleanup
+    return () => {
+      typed.current?.destroy();
+    };
+  }, []);
+
   return (
     <div className="site-wrap">
       <div className="site-mobile-menu">
@@ -104,7 +137,7 @@ const Contact = () => {
               <div className="row justify-content-center mb-4">
                 <div className="col-md-10 text-center">
                   <h1 data-aos="fade-up" className="mb-5">
-                    हमसे <span className="typed-words"></span>
+                    हमसे <span ref={typedRef} className="typed-words"></span>
                   </h1>
                 </div>
               </div>
