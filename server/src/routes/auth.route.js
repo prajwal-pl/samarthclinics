@@ -3,6 +3,6 @@ import { authFunction } from "../controllers/auth.controller.js";
 
 const router = express.Router();
 
-router.post("/auth/:role", authFunction);
+router.post("/", authFunction);
 
 export default router;
