@@ -1,4 +1,37 @@
+import { useEffect, useRef } from "react";
+import Typed from "typed.js";
+import AOS from "aos";
+
 const About = () => {
+  const typedRef = useRef<HTMLSpanElement>(null);
+  const typed = useRef<Typed | null>(null);
+
+  useEffect(() => {
+    // Initialize AOS
+    AOS.init({
+      duration: 1000,
+      once: true,
+    });
+
+    // Initialize Typed.js
+    if (typedRef.current) {
+      typed.current = new Typed(typedRef.current, {
+        strings: ["कंपनी"],
+        typeSpeed: 80,
+        backSpeed: 80,
+        backDelay: 4000,
+        startDelay: 1000,
+        loop: true,
+        showCursor: true,
+      });
+    }
+
+    // Cleanup
+    return () => {
+      typed.current?.destroy();
+    };
+  }, []);
+
   return (
     <div className="site-wrap">
       <div className="site-mobile-menu">
@@ -52,17 +85,17 @@ const About = () => {
                     </ul>
                   </li>
                   <li className="active">
-                    <a href="about.html">
+                    <a href="/about">
                       <span>हमारे बारे में</span>
                     </a>
                   </li>
                   <li>
-                    <a href="blog.html">
+                    <a href="/blog">
                       <span>ब्लॉग</span>
                     </a>
                   </li>
                   <li>
-                    <a href="contact.html">
+                    <a href="/contact">
                       <span>संपर्क</span>
                     </a>
                   </li>
@@ -96,7 +129,8 @@ const About = () => {
               <div className="row justify-content-center mb-4">
                 <div className="col-md-10 text-center">
                   <h1 data-aos="fade-up" className="mb-5">
-                    हमारे बारे में <span className="typed-words"></span>
+                    हमारे बारे में{" "}
+                    <span ref={typedRef} className="typed-words"></span>
                   </h1>
                   <p data-aos="fade-up" data-aos-delay="100">
                     <a href="#" className="btn btn-primary btn-pill">

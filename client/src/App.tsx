@@ -4,6 +4,8 @@ import { Routes, Route } from "react-router";
 import Services from "./pages/Services";
 import Contact from "./pages/Contact";
 import Blog from "./pages/Blog";
+import Signup from "./pages/sign-up";
+import Signin from "./pages/sign-in";
 
 function App() {
   return (
@@ -13,6 +15,8 @@ function App() {
       <Route path="/services" element={<Services />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/blog" element={<Blog />} />
+      <Route path="/sign-up" element={<Signup />} />
+      <Route path="/sign-in" element={<Signin />} />
     </Routes>
   );
 }
