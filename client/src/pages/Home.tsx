@@ -140,40 +140,31 @@ const Home: React.FC = () => {
         {/* Menu Items */}
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
           <li style={{ padding: "10px 0" }}>
-            <a
-              href="index.html"
-              style={{ color: "#000", textDecoration: "none" }}
-            >
+            <a href="/" style={{ color: "#000", textDecoration: "none" }}>
               होम
             </a>
           </li>
           <li style={{ padding: "10px 0" }}>
             <a
-              href="services.html"
+              href="/services"
               style={{ color: "#000", textDecoration: "none" }}
             >
               सेवाएं
             </a>
           </li>
           <li style={{ padding: "10px 0" }}>
-            <a
-              href="about.html"
-              style={{ color: "#000", textDecoration: "none" }}
-            >
+            <a href="/about" style={{ color: "#000", textDecoration: "none" }}>
               हमारे बारे में
             </a>
           </li>
           <li style={{ padding: "10px 0" }}>
-            <a
-              href="blog.html"
-              style={{ color: "#000", textDecoration: "none" }}
-            >
+            <a href="/blog" style={{ color: "#000", textDecoration: "none" }}>
               ब्लॉग
             </a>
           </li>
           <li style={{ padding: "10px 0" }}>
             <a
-              href="contact.html"
+              href="/contact"
               style={{ color: "#000", textDecoration: "none" }}
             >
               संपर्क करें
