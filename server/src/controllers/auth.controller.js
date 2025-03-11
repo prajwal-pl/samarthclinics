@@ -2,7 +2,7 @@ import User from "../models/user.js";
 
 export const authFunction = async (req, res) => {
   try {
-    const { email_addresses, id } = req.body;
+    const { email_addresses, id } = req.body.data;
 
     const email = email_addresses[0].email_address;
 
