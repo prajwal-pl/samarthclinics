@@ -170,6 +170,22 @@ const Home: React.FC = () => {
               संपर्क करें
             </a>
           </li>
+          <li>
+            <a
+              href="/sign-in"
+              style={{ color: "#000", textDecoration: "none" }}
+            >
+              Sign In
+            </a>
+          </li>
+          <li>
+            <a
+              href="/sign-up"
+              style={{ color: "#000", textDecoration: "none" }}
+            >
+              Sign Up
+            </a>
+          </li>
         </ul>
       </div>
 
@@ -203,7 +219,7 @@ const Home: React.FC = () => {
           <div className="row align-items-center">
             <div className="col-8 col-xl-4">
               <h1 className="mb-0 site-logo">
-                <a href="index.html" className="text-white mb-0">
+                <a href="/" className="text-white mb-0">
                   समर्थ क्लिनिक<span className="text-primary">.</span>
                 </a>
               </h1>
@@ -211,14 +227,14 @@ const Home: React.FC = () => {
                 फिजियोथैरेपी रिहैबिलिटेशन सेंटर
               </p>
             </div>
-            <div className="col-4 col-md-4 d-xl-none text-right">
+            <div className="col-4 col-md-3 d-xl-none text-right">
               <a
                 href="#"
                 className="site-menu-toggle js-menu-toggle text-white"
                 onClick={handleMenuToggle}
               >
-                <span className="icon-menu h3">
-                  <Menu />
+                <span className="icon-menu h3 pl-3">
+                  <Menu className="ml-10" />
                 </span>
               </a>
             </div>
@@ -229,12 +245,12 @@ const Home: React.FC = () => {
               >
                 <ul className="site-menu js-clone-nav mr-auto d-none d-lg-block">
                   <li className="active">
-                    <a href="index.html">
+                    <a href="/">
                       <span>होम</span>
                     </a>
                   </li>
                   <li className="has-children">
-                    <a href="services.html">
+                    <a href="/services">
                       <span>सेवाएं</span>
                     </a>
                     <ul className="dropdown arrow-top">
@@ -254,18 +270,28 @@ const Home: React.FC = () => {
                     </ul>
                   </li>
                   <li>
-                    <a href="about.html">
+                    <a href="/about">
                       <span>हमारे बारे में</span>
                     </a>
                   </li>
                   <li>
-                    <a href="blog.html">
+                    <a href="/blog">
                       <span>ब्लॉग</span>
                     </a>
                   </li>
                   <li>
-                    <a href="contact.html">
+                    <a href="/contact">
                       <span>संपर्क करें</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/sign-in">
+                      <span>Sign in</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/sign-up">
+                      <span>Sign up</span>
                     </a>
                   </li>
                 </ul>
