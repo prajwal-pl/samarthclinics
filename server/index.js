@@ -4,6 +4,7 @@ import { connectMongoDb } from "./lib/mongodb.js";
 import dotenv from "dotenv";
 
 import authRoute from "./routes/auth.route.js";
+import roleRoute from "./routes/role.route.js";
 
 dotenv.config();
 const app = express();
@@ -12,10 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", authRoute);
-
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+app.use("/api/role", roleRoute);
 
 app.listen(3000, () => {
   connectMongoDb();
