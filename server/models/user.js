@@ -20,6 +20,9 @@ const userSchema = new mongoose.Schema(
       default: "user",
       required: false,
     },
+    full_name: {
+      type: String,
+    },
     prescriptions: [
       {
         type: mongoose.Schema.Types.ObjectId,
