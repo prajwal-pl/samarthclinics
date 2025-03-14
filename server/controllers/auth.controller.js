@@ -1,4 +1,3 @@
-import axios from "axios";
 import User from "../models/user.js";
 
 export const authFunction = async (req, res) => {

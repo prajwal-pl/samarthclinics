@@ -9,5 +9,11 @@ const router = express.Router();
 
 router.get("/", authMiddleware, getPrescriptions);
 router.post("/create", authMiddleware, createPrescription);
+router.get(
+  "/patient/:patientId/payments",
+  authMiddleware,
+  getPatientPaymentStatus
+);
+router.patch("/payment/:prescriptionId", authMiddleware, updatePaymentStatus);
 
 export default router;

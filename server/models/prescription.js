@@ -28,6 +28,18 @@ const prescriptionSchema = new Schema(
     expiryDate: {
       type: Date,
     },
+
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "paid"],
+      default: "pending",
+    },
+    paymentDate: {
+      type: Date,
+    },
+    paymentAmount: {
+      type: Number,
+    },
   },
   { timestamps: true }
 );
