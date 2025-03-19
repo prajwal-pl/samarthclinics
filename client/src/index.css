@@ -70,6 +70,60 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.map-container {
+  width: 100%;
+  height: 450px;
+  margin: 2rem 0;
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.map-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.map-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+}
+
+.location-button {
+  padding: 15px 30px;
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.location-button:hover {
+  background-color: #1a73e8;
+  color: rgb(175, 115, 125);
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

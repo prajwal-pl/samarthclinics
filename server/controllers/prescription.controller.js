@@ -15,7 +15,7 @@ export const getPrescriptions = async (req, res) => {
       return res.status(404).json({ message: "Role not found" });
     }
 
-    if (role.role !== "doctor") {
+    if (role !== "doctor") {
       return res.status(403).json({ message: "Forbidden" });
     }
 
@@ -96,7 +96,6 @@ export const getPatientPaymentStatus = async (req, res) => {
       return res.status(403).json({ message: "Forbidden" });
     }
 
-    // Find prescriptions for specific patient by this doctor
     const prescriptions = await Prescription.find({
       doctor: userId,
       patient: patientId,

@@ -1,7 +1,9 @@
 import express from "express";
 import {
   createPrescription,
+  getPatientPaymentStatus,
   getPrescriptions,
+  updatePaymentStatus,
 } from "../controllers/prescription.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 

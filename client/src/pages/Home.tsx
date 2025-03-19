@@ -15,16 +15,67 @@ import {
   faTwitter,
   faInstagram,
   faYoutube,
+  faWhatsapp,
 } from "@fortawesome/free-brands-svg-icons";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Menu, X } from "lucide-react";
+import Map from "../components/Map";
+
+// Add a custom hook for counter animation
+const useCounter = (end: number, duration: number = 2000) => {
+  const [count, setCount] = useState(0);
+  const countRef = useRef<HTMLSpanElement>(null);
+  const observer = useRef<IntersectionObserver | null>(null);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    observer.current = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && !hasAnimated.current) {
+          hasAnimated.current = true;
+          let start = 0;
+          const step = Math.ceil(end / (duration / 16)); // 16ms is approx one frame at 60fps
+
+          const timer = setInterval(() => {
+            start += step;
+            if (start >= end) {
+              setCount(end);
+              clearInterval(timer);
+            } else {
+              setCount(start);
+            }
+          }, 16);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (countRef.current) {
+      observer.current.observe(countRef.current);
+    }
+
+    return () => {
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+    };
+  }, [end, duration]);
+
+  return { count, countRef };
+};
 
 const Home: React.FC = () => {
   const typedRef = useRef<HTMLSpanElement>(null);
   const typed = useRef<Typed | null>(null);
   const [menuOpen, setMenuOpen] = useState(false); // Add state for menu toggle
+
+  // Initialize counters
+  const customersCounter = useCounter(200);
+  const yearsCounter = useCounter(2);
+  const satisfactionCounter = useCounter(100);
 
   useEffect(() => {
     // Initialize AOS
@@ -36,7 +87,12 @@ const Home: React.FC = () => {
     // Initialize Typed.js
     if (typedRef.current) {
       typed.current = new Typed(typedRef.current, {
-        strings: ["दर्द", "तनाव", "थकान"],
+        strings: [
+          "सालों पुराने दर्द",
+          "सालों पुराने तनाव",
+          "सालों पुराने थकान",
+          "लाइलाज बिमारी",
+        ],
         typeSpeed: 80,
         backSpeed: 80,
         backDelay: 4000,
@@ -326,16 +382,37 @@ const Home: React.FC = () => {
               <div className="row justify-content-center mb-4">
                 <div className="col-md-10 text-center">
                   <h1 data-aos="fade-up" className="mb-5">
-                    हम आपके लिए समाधान देते हैं <span ref={typedRef}></span>
+                    हम समाधान देते हैं आपके{" "}
+                    <span className="text-pink-400" ref={typedRef}></span>
                   </h1>
-                  <p data-aos="fade-up" data-aos-delay="100">
+                  <div className="d-flex justify-content-center flex-wrap">
                     <a
-                      href="https://docs.google.com/forms/d/e/1FAIpQLSffoTrMEMzFGiZF8QtC4zgejMu7LZ-0nlj7MUa1MlK7j5p5jA/viewform?embedded=true"
-                      className="btn btn-primary btn-pill"
+                      href="https://docs.google.com/forms/d/1Pykg91TjGn-U420oOcn8tlVYACLK66sepwleTdOSrec/edit"
+                      className="btn btn-primary btn-pill mr-3 mb-3"
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
-                      अपॉइंटमेंट बुक करें
+                      खूद अपॉइंटमेंट बुक करें
                     </a>
-                  </p>
+                    <a
+                      href="upi://pay?pa=akkiathletic@ybl"
+                      className="btn btn-success btn-pill mr-3 mb-3"
+                    >
+                      भुगतान करें
+                    </a>
+                    <a
+                      href="https://wa.me/+917004119766?text=नमस्कार डॉक्टर साहब, हमको आपके पास इलाज करवाना है!"
+                      className="btn btn-secondary btn-pill mb-3"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <FontAwesomeIcon
+                        icon={faWhatsapp}
+                        style={{ fontSize: "24px", color: "green" }}
+                      />{" "}
+                      वॉट्सएप पर बात करें
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -639,8 +716,12 @@ const Home: React.FC = () => {
               <div className="col-sm-4">
                 <div className="counter">
                   <div className="number-wrap">
-                    <span className="block-counter-1-number" data-number="200">
-                      0
+                    <span
+                      className="block-counter-1-number"
+                      data-number="200"
+                      ref={customersCounter.countRef}
+                    >
+                      {customersCounter.count}
                     </span>
                     <span className="append"></span>
                   </div>
@@ -650,8 +731,12 @@ const Home: React.FC = () => {
               <div className="col-sm-4">
                 <div className="counter">
                   <div className="number-wrap">
-                    <span className="block-counter-1-number" data-number="2">
-                      0
+                    <span
+                      className="block-counter-1-number"
+                      data-number="2"
+                      ref={yearsCounter.countRef}
+                    >
+                      {yearsCounter.count}
                     </span>
                     <span className="append"></span>
                   </div>
@@ -661,8 +746,12 @@ const Home: React.FC = () => {
               <div className="col-sm-4">
                 <div className="counter">
                   <div className="number-wrap">
-                    <span className="block-counter-1-number" data-number="100">
-                      0
+                    <span
+                      className="block-counter-1-number"
+                      data-number="100"
+                      ref={satisfactionCounter.countRef}
+                    >
+                      {satisfactionCounter.count}
                     </span>
                     <span className="append">%</span>
                   </div>
@@ -861,6 +950,8 @@ const Home: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <Map />
 
       <footer className="site-footer">
         <div className="container">
