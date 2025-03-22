@@ -77,3 +77,20 @@ export const DeleteBooking = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const slotAvailability = async (req, res) => {
+  const { doctorId, date, time } = req.body;
+
+  try {
+    const booking = await Booking.findOne({ doctor: doctorId, date, time });
+
+    if (!booking) {
+      return res.status(200).json({ message: "Slot is available" });
+    }
+
+    res.status(409).json({ message: "Slot is not available" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};

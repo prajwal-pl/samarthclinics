@@ -29,6 +29,12 @@ const userSchema = new mongoose.Schema(
         ref: "Prescription",
       },
     ],
+    bookings: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Booking",
+      },
+    ],
   },
   {
     timestamps: true,

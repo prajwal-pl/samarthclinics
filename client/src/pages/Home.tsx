@@ -226,7 +226,7 @@ const Home: React.FC = () => {
               संपर्क करें
             </a>
           </li>
-          <li>
+          <li style={{ padding: "10px 0" }}>
             <a
               href="/sign-in"
               style={{ color: "#000", textDecoration: "none" }}
@@ -234,7 +234,7 @@ const Home: React.FC = () => {
               Sign In
             </a>
           </li>
-          <li>
+          <li style={{ padding: "10px 0" }}>
             <a
               href="/sign-up"
               style={{ color: "#000", textDecoration: "none" }}
