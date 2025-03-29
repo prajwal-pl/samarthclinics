@@ -22,6 +22,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Menu, X } from "lucide-react";
 import Map from "../components/Map";
+import { SignOutButton, useUser } from "@clerk/clerk-react";
 
 // Add a custom hook for counter animation
 const useCounter = (end: number, duration: number = 2000) => {
@@ -70,7 +71,8 @@ const useCounter = (end: number, duration: number = 2000) => {
 const Home: React.FC = () => {
   const typedRef = useRef<HTMLSpanElement>(null);
   const typed = useRef<Typed | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false); // Add state for menu toggle
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { isSignedIn } = useUser(); // Add state for menu toggle
 
   // Initialize counters
   const customersCounter = useCounter(200);
@@ -226,22 +228,30 @@ const Home: React.FC = () => {
               संपर्क करें
             </a>
           </li>
-          <li style={{ padding: "10px 0" }}>
-            <a
-              href="/sign-in"
-              style={{ color: "#000", textDecoration: "none" }}
-            >
-              Sign In
-            </a>
-          </li>
-          <li style={{ padding: "10px 0" }}>
-            <a
-              href="/sign-up"
-              style={{ color: "#000", textDecoration: "none" }}
-            >
-              Sign Up
-            </a>
-          </li>
+          {isSignedIn ? (
+            <li style={{ padding: "10px 0" }}>
+              <SignOutButton />
+            </li>
+          ) : (
+            <>
+              <li style={{ padding: "10px 0" }}>
+                <a
+                  href="/sign-in"
+                  style={{ color: "#000", textDecoration: "none" }}
+                >
+                  Sign In
+                </a>
+              </li>
+              <li style={{ padding: "10px 0" }}>
+                <a
+                  href="/sign-up"
+                  style={{ color: "#000", textDecoration: "none" }}
+                >
+                  Sign Up
+                </a>
+              </li>
+            </>
+          )}
         </ul>
       </div>
 

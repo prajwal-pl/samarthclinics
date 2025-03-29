@@ -1,9 +1,14 @@
 import User from "../models/user.js";
 
 export const roleFunction = async (req, res) => {
-  const { id } = req.query;
+  const { id } = req.params;
   try {
-    const user = await User.findById(id);
+    const user = await User.findOne({
+      clerkId: id,
+    });
+
+    console.log(user);
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -16,17 +21,18 @@ export const roleFunction = async (req, res) => {
 };
 
 export const updateRole = async (req, res) => {
-  const { id, role } = req.body;
+  const { id, role, email } = req.body;
   try {
-    const user = await User.findById(id);
+    const user = await User.findOne({
+      // clerkId: id,
+      email,
+    });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    await User.findByIdAndUpdate(id, {
-      role,
-    });
+    await user.updateOne({ role });
 
     res.status(200).json({ message: "Role updated successfully" });
   } catch (error) {

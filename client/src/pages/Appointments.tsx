@@ -14,8 +14,10 @@ const Appointments = () => {
   const fetchRole = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.BACKEND_URL}/role?id=${userId}`
+        `${import.meta.env.VITE_BACKEND_URL}/role/${userId}`
       );
+
+      console.log(res.data.role);
 
       if (res.data.role) {
         setRole(res.data.role);
@@ -31,7 +33,7 @@ const Appointments = () => {
     fetchRole();
   }, []);
 
-  return <>{role === "doctor" ? <Appointment /> : <DoctorAppointments />}</>;
+  return <>{role === "user" ? <Appointment /> : <DoctorAppointments />}</>;
 };
 
 export default Appointments;

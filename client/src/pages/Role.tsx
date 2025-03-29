@@ -7,12 +7,15 @@ import { toast } from "sonner";
 const Role = () => {
   const { user } = useUser();
   const userId = user?.id;
+  const email = user?.emailAddresses[0].emailAddress;
   const navigate = useNavigate();
 
   const fetchRole = async () => {
     const res = await axios.get(
-      `${import.meta.env.BACKEND_URL}/role?id=${userId}`
+      `${import.meta.env.BACKEND_URL}/role/${userId}`
     );
+
+    console.log(res);
 
     if (res.data.role) {
       toast("Role already exists");
@@ -27,17 +30,18 @@ const Role = () => {
   const handleDoctorClick = async () => {
     try {
       const response = await axios.post(
-        `${import.meta.env.BACKEND_URL}/role/update`,
+        `${import.meta.env.VITE_BACKEND_URL}/role/update`,
         {
           id: userId,
           role: "doctor",
+          email,
         }
       );
 
       if (response.status === 200) {
         console.log("Role updated successfully");
         toast("Role updated successfully");
-        window.location.href = "/doctor/appointments";
+        window.location.href = "/appointments";
       } else {
         console.error("Failed to update role");
         toast("Failed to update role");
@@ -50,10 +54,11 @@ const Role = () => {
   const handlePatientClick = async () => {
     try {
       const response = await axios.post(
-        `${import.meta.env.BACKEND_URL}/role/update`,
+        `${import.meta.env.VITE_BACKEND_URL}/role/update`,
         {
           id: userId,
-          role: "patient",
+          role: "user",
+          email,
         }
       );
 
@@ -71,17 +76,18 @@ const Role = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex flex-col items-center justify-center h-screen">
+      <h1 className="text-xl font-bold py-4">Pick Your Role</h1>
       <div className="flex items-center justify-center gap-2">
         <span
           onClick={handleDoctorClick}
-          className="border border-blue-600 p-6 hover:bg-blue-500 text-blue-500 hover:text-white"
+          className="border border-blue-600 p-6 hover:bg-blue-500 text-blue-500 hover:text-white rounded cursor-pointer"
         >
           Doctor
         </span>
         <span
           onClick={handlePatientClick}
-          className="border border-blue-600 p-6 hover:bg-blue-500 text-blue-500 hover:text-white"
+          className="border border-blue-600 p-6 hover:bg-blue-500 text-blue-500 hover:text-white rounded cursor-pointer"
         >
           Patient
         </span>
