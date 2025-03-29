@@ -6,6 +6,8 @@ import Contact from "./pages/Contact";
 import Blog from "./pages/Blog";
 import Signup from "./pages/sign-up";
 import Signin from "./pages/sign-in";
+import Appointment from "./pages/Appointment";
+import DoctorAppointments from "./pages/DoctorAppointments";
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
       <Route path="/blog" element={<Blog />} />
       <Route path="/sign-up" element={<Signup />} />
       <Route path="/sign-in" element={<Signin />} />
+      <Route path="/appointments" element={<Appointment />} />
+      <Route path="/doctor/appointments" element={<DoctorAppointments />} />
     </Routes>
   );
 }
