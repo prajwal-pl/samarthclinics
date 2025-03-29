@@ -88,6 +88,76 @@ const DoctorAppointments = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
+  // Mock data for appointments
+  const mockBookings: Booking[] = [
+    {
+      _id: "1",
+      doctor: "current-doctor-id",
+      date: format(new Date(), "yyyy-MM-dd"), // Today
+      time: "10:00",
+      patientName: "John Doe",
+      patientEmail: "john.doe@example.com",
+      patientPhone: "555-123-4567",
+      issue: "Lower back pain after lifting weights",
+      status: "scheduled",
+    },
+    {
+      _id: "2",
+      doctor: "current-doctor-id",
+      date: format(new Date(), "yyyy-MM-dd"), // Today
+      time: "14:30",
+      patientName: "Jane Smith",
+      patientEmail: "jane.smith@example.com",
+      patientPhone: "555-987-6543",
+      issue: "Shoulder rehabilitation after surgery",
+      status: "scheduled",
+    },
+    {
+      _id: "3",
+      doctor: "current-doctor-id",
+      date: format(addDays(new Date(), 1), "yyyy-MM-dd"), // Tomorrow
+      time: "09:15",
+      patientName: "Robert Johnson",
+      patientEmail: "robert.j@example.com",
+      patientPhone: "555-555-5555",
+      issue: "Knee pain when walking up stairs",
+      status: "scheduled",
+    },
+    {
+      _id: "4",
+      doctor: "current-doctor-id",
+      date: format(addDays(new Date(), 3), "yyyy-MM-dd"), // 3 days from now
+      time: "11:00",
+      patientName: "Sarah Williams",
+      patientEmail: "sarah.w@example.com",
+      patientPhone: "555-444-3333",
+      issue: "Sprained ankle from running",
+      status: "scheduled",
+    },
+    {
+      _id: "5",
+      doctor: "current-doctor-id",
+      date: format(addDays(new Date(), -2), "yyyy-MM-dd"), // 2 days ago
+      time: "13:45",
+      patientName: "Michael Brown",
+      patientEmail: "michael.b@example.com",
+      patientPhone: "555-222-1111",
+      issue: "Tennis elbow treatment",
+      status: "completed",
+    },
+    {
+      _id: "6",
+      doctor: "current-doctor-id",
+      date: format(addDays(new Date(), -1), "yyyy-MM-dd"), // Yesterday
+      time: "16:30",
+      patientName: "Emily Davis",
+      patientEmail: "emily.d@example.com",
+      patientPhone: "555-888-9999",
+      issue: "Posture assessment and correction",
+      status: "cancelled",
+    },
+  ];
+
   // Doctor ID should come from auth context in a real app
   const doctorId = "current-doctor-id";
 
@@ -102,12 +172,13 @@ const DoctorAppointments = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      // In a real app, this would filter by the logged-in doctor's ID
-      const response = await axios.get("/api/bookings");
-      setBookings(response.data);
+      // Instead of making an API call, use the mock data
+      setTimeout(() => {
+        setBookings(mockBookings);
+        setLoading(false);
+      }, 500); // Add a small delay to simulate network request
     } catch (error) {
       console.error("Error fetching bookings:", error);
-    } finally {
       setLoading(false);
     }
   };
@@ -236,12 +307,11 @@ const DoctorAppointments = () => {
 
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search patients..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8"
+              style={{ paddingLeft: "2.25rem" }}
             />
           </div>
 
@@ -461,7 +531,7 @@ const DoctorAppointments = () => {
               cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="mx-auto w-full">
             <Button
               variant="outline"
               onClick={() => setIsConfirmDialogOpen(false)}
@@ -469,7 +539,7 @@ const DoctorAppointments = () => {
               Cancel
             </Button>
             <Button
-              variant="destructive"
+              className="bg-red-500 text-red-500"
               onClick={() =>
                 selectedBooking && handleDeleteBooking(selectedBooking._id)
               }
