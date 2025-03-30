@@ -6,41 +6,36 @@ export const GetBookings = async (req, res) => {
   const { id } = req.params;
 
   try {
+    let doctorId;
+
     // Check if the id is a MongoDB ObjectId (doctor's MongoDB ID directly)
     if (mongoose.Types.ObjectId.isValid(id)) {
-      const bookings = await Booking.find({
-        doctor: id,
-      })
-        .populate("user", "full_name email")
-        .sort({ date: -1, time: -1 });
+      doctorId = id;
+    } else {
+      // Otherwise, assume it's a clerkId
+      const doctor = await User.findOne({ clerkId: id });
 
-      if (!bookings || bookings.length === 0) {
-        return res.status(404).json({ message: "No bookings found" });
+      if (!doctor) {
+        return res.status(404).json({ message: "Doctor not found" });
       }
 
-      return res.status(200).json(bookings);
+      doctorId = doctor._id;
     }
 
-    // Otherwise, assume it's a clerkId
-    const doctor = await User.findOne({
-      clerkId: id,
-    });
-
-    if (!doctor) {
-      return res.status(404).json({ message: "Doctor not found" });
-    }
-
-    const bookings = await Booking.find({
-      doctor: doctor._id,
-    })
-      .populate("user", "full_name email")
+    // Always fully populate the user field to ensure consistent data format
+    const bookings = await Booking.find({ doctor: doctorId })
+      .populate({
+        path: "user",
+        select: "full_name email phoneNumber _id",
+        model: "User",
+      })
       .sort({ date: -1, time: -1 });
 
     if (!bookings || bookings.length === 0) {
       return res.status(404).json({ message: "No bookings found" });
     }
 
-    res.status(200).json(bookings);
+    return res.status(200).json(bookings);
   } catch (error) {
     console.error("Error in GetBookings:", error);
     res.status(500).json({ message: error.message });
@@ -51,7 +46,12 @@ export const GetBooking = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const booking = await Booking.findById(id);
+    // Populate user details here too for consistency
+    const booking = await Booking.findById(id).populate({
+      path: "user",
+      select: "full_name email phoneNumber _id",
+      model: "User",
+    });
 
     if (!booking) {
       return res.status(404).json({ message: "No booking found" });
@@ -95,6 +95,10 @@ export const UpdateBooking = async (req, res) => {
 
     const updatedBooking = await Booking.findByIdAndUpdate(id, booking, {
       new: true,
+    }).populate({
+      path: "user",
+      select: "full_name email phoneNumber _id",
+      model: "User",
     });
 
     res.json(updatedBooking);

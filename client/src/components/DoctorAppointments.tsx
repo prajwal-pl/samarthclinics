@@ -1,14 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +13,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import {
@@ -49,55 +41,51 @@ import {
   Mail,
   Clock,
   Filter,
-  Search,
   FileEdit,
   Trash2,
   User,
+  AlertCircle,
 } from "lucide-react";
-import {
-  format,
-  isToday,
-  isTomorrow,
-  addDays,
-  parseISO,
-  isBefore,
-  isAfter,
-} from "date-fns";
+import { format, isToday, isTomorrow, parseISO, isAfter } from "date-fns";
 import { useSession, useUser } from "@clerk/clerk-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+// Type definitions that match server responses
+interface UserDetails {
+  _id: string;
+  email: string;
+  phoneNumber?: string;
+  full_name: string;
+}
 
 interface Booking {
   _id: string;
   doctor: string;
   date: string;
   time: string;
-  user: string;
+  user: UserDetails; // This is now an object, not just an ID
   issue: string;
-  status: "scheduled" | "completed" | "cancelled";
-}
-
-interface Userdetails {
-  _id: string;
-  email: string;
-  phoneNumber: string;
-  full_name: string;
+  status: "scheduled" | "completed" | "cancelled" | "pending" | "confirmed";
+  createdAt: string;
+  updatedAt: string;
 }
 
 const DoctorAppointments = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const [userDetails, setUserDetails] = useState<Userdetails[]>([]);
 
   const { user, isLoaded } = useUser();
   const { session } = useSession();
 
-  const doctorId = user?.id || session?.user.id;
+  const doctorId = user?.id || session?.user?.id;
 
   useEffect(() => {
     if (isLoaded && doctorId) {
@@ -112,6 +100,7 @@ const DoctorAppointments = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
+      setError(null);
 
       // First, get the doctor's MongoDB ID from the clerk ID
       const doctorResponse = await axios.get(
@@ -120,51 +109,55 @@ const DoctorAppointments = () => {
 
       const doctorMongoId = doctorResponse.data._id;
 
-      // Now use the MongoDB ID to fetch bookings
+      if (!doctorMongoId) {
+        throw new Error("Could not retrieve doctor information");
+      }
+
+      // Now use the MongoDB ID to fetch bookings with populated user data
       const response = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/booking/${doctorMongoId}`
       );
 
+      // Validate that we received proper booking data
       const data = response.data;
-      setBookings(data);
 
-      // Debug log to see the data structure
-      console.log("Bookings received:", data);
+      if (!Array.isArray(data)) {
+        throw new Error("Received invalid booking data format");
+      }
 
-      const uniqueUserIds = [
-        ...new Set(data.map((booking: Booking) => booking.user)),
-      ] as string[];
+      // Verify each booking has the user property as an object
+      const validatedBookings = data.map((booking: any) => {
+        // Ensure booking.user is an object with required properties
+        if (!booking.user || typeof booking.user !== "object") {
+          console.warn(
+            `Booking ${booking._id} has missing user data, using placeholder`
+          );
+          // Provide a placeholder user object to avoid null references
+          booking.user = {
+            _id: "unknown",
+            full_name: "Unknown Patient",
+            email: "no-email@placeholder.com",
+            phoneNumber: "N/A",
+          };
+        }
+        return booking;
+      });
 
-      console.log("Unique user IDs:", uniqueUserIds);
-
-      await fetchUserDetails(uniqueUserIds);
-    } catch (error) {
+      setBookings(validatedBookings);
+    } catch (error: any) {
       console.error("Error fetching bookings:", error);
+      setError(error.message || "Failed to load appointments");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchUserDetails = async (userIds: string[]) => {
-    try {
-      console.log("Fetching details for users:", userIds);
-
-      const userPromises = userIds.map((userId) =>
-        axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/${userId}`)
-      );
-
-      const userResponses = await Promise.all(userPromises);
-      const users = userResponses.map((response) => response.data);
-
-      console.log("User details received:", users);
-
-      setUserDetails(users);
-    } catch (error) {
-      console.error("Error fetching user details:", error);
-    }
-  };
-
   const filterBookings = () => {
+    if (!bookings.length) {
+      setFilteredBookings([]);
+      return;
+    }
+
     let filtered = [...bookings];
 
     if (activeTab === "today") {
@@ -176,18 +169,21 @@ const DoctorAppointments = () => {
           !isToday(parseISO(booking.date))
       );
     } else if (activeTab === "completed") {
-      filtered = filtered.filter((booking) => booking.status === "completed");
+      filtered = filtered.filter(
+        (booking) =>
+          booking.status === "completed" || booking.status === "confirmed"
+      );
     }
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter((booking) => {
-        const user = userDetails.find((u) => u._id === booking.user);
+        // Now user is an object with properties directly accessible
         return (
-          user?.full_name?.toLowerCase().includes(term) ||
-          user?.phoneNumber?.includes(term) ||
-          user?.email?.toLowerCase().includes(term) ||
-          booking.issue.toLowerCase().includes(term)
+          booking.user?.full_name?.toLowerCase().includes(term) ||
+          booking.user?.phoneNumber?.includes(term) ||
+          booking.user?.email?.toLowerCase().includes(term) ||
+          booking.issue?.toLowerCase().includes(term)
         );
       });
     }
@@ -206,42 +202,26 @@ const DoctorAppointments = () => {
     setFilteredBookings(filtered);
   };
 
-  const updateBookingStatus = async (
-    id: string,
-    status: "scheduled" | "completed" | "cancelled"
-  ) => {
-    try {
-      await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/booking/update/${id}`,
-        { status }
-      );
-      setBookings(
-        bookings.map((booking) =>
-          booking._id === id ? { ...booking, status } : booking
-        )
-      );
-      setIsConfirmDialogOpen(false);
-    } catch (error) {
-      console.error("Error updating booking status:", error);
-    }
-  };
-
   const handleUpdateBooking = async (updatedBooking: Booking) => {
     try {
-      await axios.post(
+      const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/booking/update/${
           updatedBooking._id
         }`,
         updatedBooking
       );
-      setBookings(
-        bookings.map((booking) =>
-          booking._id === updatedBooking._id ? updatedBooking : booking
-        )
-      );
-      setIsEditDialogOpen(false);
-    } catch (error) {
+
+      if (response.data) {
+        setBookings(
+          bookings.map((booking) =>
+            booking._id === updatedBooking._id ? response.data : booking
+          )
+        );
+        setIsEditDialogOpen(false);
+      }
+    } catch (error: any) {
       console.error("Error updating booking:", error);
+      alert(`Failed to update: ${error.message}`);
     }
   };
 
@@ -252,16 +232,19 @@ const DoctorAppointments = () => {
       );
       setBookings(bookings.filter((booking) => booking._id !== id));
       setIsConfirmDialogOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting booking:", error);
+      alert(`Failed to delete: ${error.message}`);
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "scheduled":
+      case "pending":
         return <Badge className="bg-blue-500">Pending</Badge>;
       case "completed":
+      case "confirmed":
         return <Badge className="bg-green-500">Confirmed</Badge>;
       case "cancelled":
         return <Badge className="bg-red-500">Cancelled</Badge>;
@@ -277,13 +260,17 @@ const DoctorAppointments = () => {
     return format(date, "PPP");
   };
 
-  const getUserDetailsById = (userId: string) => {
-    return userDetails.find((user) => user._id === userId);
-  };
-
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-8">Doctor Appointments Dashboard</h1>
+
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <Tabs
@@ -364,16 +351,15 @@ const DoctorAppointments = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredBookings.map((booking) => {
-                const userDetail = getUserDetailsById(booking.user);
-                return (
+              {filteredBookings.map((booking) => (
+                <>
                   <TableRow key={booking._id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
                         <div className="bg-slate-100 p-2 rounded-full">
                           <User className="h-4 w-4" />
                         </div>
-                        {userDetail?.full_name || "Unknown"}
+                        {booking.user?.full_name || "Unknown Patient"}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -392,18 +378,18 @@ const DoctorAppointments = () => {
                       <div className="flex flex-col gap-1">
                         <span className="flex items-center text-sm">
                           <Phone className="mr-1 h-3 w-3 text-muted-foreground" />
-                          {userDetail?.phoneNumber || "N/A"}
+                          {booking.user?.phoneNumber || "N/A"}
                         </span>
                         <span className="flex items-center text-sm">
                           <Mail className="mr-1 h-3 w-3 text-muted-foreground" />
-                          {userDetail?.email || "N/A"}
+                          {booking.user?.email || "N/A"}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="max-w-xs truncate" title={booking.issue}>
-                        {booking.issue.substring(0, 50)}
-                        {booking.issue.length > 50 ? "..." : ""}
+                        {booking.issue?.substring(0, 50) || "No description"}
+                        {booking.issue?.length > 50 ? "..." : ""}
                       </div>
                     </TableCell>
                     <TableCell>{getStatusBadge(booking.status)}</TableCell>
@@ -432,8 +418,8 @@ const DoctorAppointments = () => {
                       </div>
                     </TableCell>
                   </TableRow>
-                );
-              })}
+                </>
+              ))}
             </TableBody>
           </Table>
         </div>
@@ -452,9 +438,7 @@ const DoctorAppointments = () => {
               <div>
                 <Label>Patient Name</Label>
                 <Input
-                  value={
-                    getUserDetailsById(selectedBooking.user)?.full_name || ""
-                  }
+                  value={selectedBooking.user?.full_name || "Unknown Patient"}
                   disabled
                 />
               </div>
@@ -466,7 +450,7 @@ const DoctorAppointments = () => {
                   onValueChange={(value) =>
                     setSelectedBooking({
                       ...selectedBooking,
-                      status: value as "scheduled" | "completed" | "cancelled",
+                      status: value as any,
                     })
                   }
                 >
@@ -531,7 +515,7 @@ const DoctorAppointments = () => {
               Cancel
             </Button>
             <Button
-              className="bg-red-500 text-red-500"
+              variant="destructive"
               onClick={() =>
                 selectedBooking && handleDeleteBooking(selectedBooking._id)
               }

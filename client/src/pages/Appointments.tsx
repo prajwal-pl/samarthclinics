@@ -29,7 +29,8 @@ const Appointments = () => {
     fetchRole();
   }, []);
 
-  return <>{role === "user" ? <Appointment /> : <DoctorAppointments />}</>;
+  //   return <>{role === "user" ? <Appointment /> : <DoctorAppointments />}</>;
+  return <DoctorAppointments />;
 };
 
 export default Appointments;

@@ -240,9 +240,20 @@ const Home: React.FC = () => {
             </a>
           </li>
           {isSignedIn ? (
-            <li style={{ padding: "10px 0" }}>
-              <SignOutButton />
-            </li>
+            <>
+              <li style={{ padding: "10px 0" }}>
+                <button
+                  onClick={() => {
+                    window.location.href = "/dashboard";
+                  }}
+                >
+                  Dashboard
+                </button>
+              </li>
+              <li style={{ padding: "10px 0" }}>
+                <SignOutButton />
+              </li>
+            </>
           ) : (
             <>
               <li style={{ padding: "10px 0" }}>
@@ -250,7 +261,7 @@ const Home: React.FC = () => {
                   href="/sign-in"
                   style={{ color: "#000", textDecoration: "none" }}
                 >
-                  Sign In
+                  Doctor Sign In
                 </a>
               </li>
               <li style={{ padding: "10px 0" }}>
@@ -258,7 +269,7 @@ const Home: React.FC = () => {
                   href="/sign-up"
                   style={{ color: "#000", textDecoration: "none" }}
                 >
-                  Sign Up
+                  Doctor Sign Up
                 </a>
               </li>
             </>
@@ -337,9 +348,20 @@ const Home: React.FC = () => {
                     </a>
                   </li>
                   {isSignedIn ? (
-                    <li style={{ padding: "10px 0" }}>
-                      <SignOutButton />
-                    </li>
+                    <>
+                      <li style={{ padding: "10px 0" }}>
+                        <button
+                          onClick={() => {
+                            window.location.href = "/dashboard";
+                          }}
+                        >
+                          Dashboard
+                        </button>
+                      </li>
+                      <li style={{ padding: "10px 0" }}>
+                        <SignOutButton />
+                      </li>
+                    </>
                   ) : (
                     <>
                       <li style={{ padding: "10px 0" }}>
@@ -347,7 +369,7 @@ const Home: React.FC = () => {
                           href="/sign-in"
                           style={{ color: "#000", textDecoration: "none" }}
                         >
-                          Sign In
+                          Doctor Sign In
                         </a>
                       </li>
                       <li style={{ padding: "10px 0" }}>
@@ -355,7 +377,7 @@ const Home: React.FC = () => {
                           href="/sign-up"
                           style={{ color: "#000", textDecoration: "none" }}
                         >
-                          Sign Up
+                          Doctor Sign Up
                         </a>
                       </li>
                     </>
