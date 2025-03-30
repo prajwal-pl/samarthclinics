@@ -8,6 +8,7 @@ import Signup from "./pages/sign-up";
 import Signin from "./pages/sign-in";
 import Role from "./pages/Role";
 import Appointments from "./pages/Appointments";
+import DataForm from "./components/DataForm";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       <Route path="/sign-up" element={<Signup />} />
       <Route path="/sign-in" element={<Signin />} />
       <Route path="/role" element={<Role />} />
+      <Route path="/form" element={<DataForm />} />
       <Route path="/appointments" element={<Appointments />} />
     </Routes>
   );

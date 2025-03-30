@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -28,20 +27,20 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { useNavigate } from "react-router";
 
 const Appointment = () => {
   const [doctors, setDoctors] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [issue, setIssue] = useState("");
   const [isSlotAvailable, setIsSlotAvailable] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
 
   const timeSlots = [
     "09:00",
@@ -62,7 +61,10 @@ const Appointment = () => {
     // Fetch doctors list from API
     const fetchDoctors = async () => {
       try {
-        const response = await axios.get("/api/doctors");
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/role/doctors`
+        );
+        console.log(response.data);
         setDoctors(response.data);
       } catch (error) {
         console.error("Error fetching doctors:", error);
@@ -81,11 +83,14 @@ const Appointment = () => {
 
   const checkSlotAvailability = async () => {
     try {
-      const response = await axios.post("/api/bookings/availability", {
-        doctorId: selectedDoctor,
-        date: format(selectedDate as Date, "yyyy-MM-dd"),
-        time: selectedTime,
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/booking/time-slot`,
+        {
+          doctorId: selectedDoctor,
+          date: format(selectedDate as Date, "yyyy-MM-dd"),
+          time: selectedTime,
+        }
+      );
 
       setIsSlotAvailable(response.data.message === "Slot is available");
     } catch (error) {
@@ -104,26 +109,33 @@ const Appointment = () => {
       return;
     }
 
+    const user = localStorage.getItem("userId");
+
     try {
       setIsSubmitting(true);
-      const response = await axios.post("/api/bookings", {
-        doctor: selectedDoctor,
-        date: format(selectedDate as Date, "yyyy-MM-dd"),
-        time: selectedTime,
-        patientName: name,
-        patientEmail: email,
-        patientPhone: phone,
-        issue: issue,
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/booking/create`,
+        {
+          doctor: selectedDoctor,
+          date: format(selectedDate as Date, "yyyy-MM-dd"),
+          time: selectedTime,
+          user,
+          issue,
+        }
+      );
 
-      setSuccessMessage("Appointment booked successfully!");
+      if (response.status === 201) {
+        toast("Appointment booked successfully", {
+          description: "Your appointment has been successfully booked.",
+        });
+        navigate("/");
+        setSuccessMessage("Appointment booked successfully!");
+      }
       // Reset form
       setSelectedDoctor("");
       setSelectedDate(undefined);
       setSelectedTime("");
-      setName("");
-      setEmail("");
-      setPhone("");
+
       setIssue("");
     } catch (error) {
       console.error("Error booking appointment:", error);
@@ -134,15 +146,17 @@ const Appointment = () => {
   };
 
   return (
-    <div className="h-auto mx-auto py-8 px-4 ">
-      <h1 className="text-3xl font-bold mb-8 text-center">
+    <div className="max-w-5xl h-auto mx-auto py-12 px-6">
+      <h1 className="text-4xl font-bold mb-10 text-center text-primary">
         Book Your Physiotherapy Appointment
       </h1>
 
       {successMessage && (
-        <Alert className="mb-4 bg-green-50 border-green-200">
-          <AlertCircle className="h-4 w-4 text-green-600" />
-          <AlertTitle className="text-green-800">Success</AlertTitle>
+        <Alert className="mb-6 bg-green-50 border-green-200 shadow-sm">
+          <AlertCircle className="h-5 w-5 text-green-600" />
+          <AlertTitle className="text-green-800 font-medium">
+            Success
+          </AlertTitle>
           <AlertDescription className="text-green-700">
             {successMessage}
           </AlertDescription>
@@ -150,65 +164,73 @@ const Appointment = () => {
       )}
 
       {errorMessage && (
-        <Alert className="mb-4 bg-red-50 border-red-200">
-          <AlertCircle className="h-4 w-4 text-red-600" />
-          <AlertTitle className="text-red-800">Error</AlertTitle>
+        <Alert className="mb-6 bg-red-50 border-red-200 shadow-sm">
+          <AlertCircle className="h-5 w-5 text-red-600" />
+          <AlertTitle className="text-red-800 font-medium">Error</AlertTitle>
           <AlertDescription className="text-red-700">
             {errorMessage}
           </AlertDescription>
         </Alert>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Appointment Details</CardTitle>
-          <CardDescription>
-            Fill in the details to book your appointment
+      <Card className="shadow-md border-t-4 border-t-primary">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-2xl text-primary">
+            Appointment Details
+          </CardTitle>
+          <CardDescription className="text-base">
+            Fill in the details to book your appointment with our specialists
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-7">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-5">
                 <div>
-                  <Label htmlFor="doctor">Select Doctor</Label>
+                  <Label
+                    htmlFor="doctor"
+                    className="text-base mb-1.5 block font-medium"
+                  >
+                    Select Doctor
+                  </Label>
                   <Select
                     value={selectedDoctor}
                     onValueChange={setSelectedDoctor}
                     required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11 border-slate-300 hover:border-primary focus:ring-1 focus:ring-primary">
                       <SelectValue placeholder="Select a doctor" />
                     </SelectTrigger>
                     <SelectContent>
-                      {/* {doctors.map((doctor: any) => (
+                      {doctors.map((doctor: any) => (
                         <SelectItem key={doctor._id} value={doctor._id}>
-                          {doctor.name} - {doctor.specialization}
+                          {doctor.full_name || "undefined"} - {doctor.email}
                         </SelectItem>
-                      ))} */}
-                      Name - Specialization
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
-                  <Label>Select Date</Label>
+                  <Label className="text-base mb-1.5 block font-medium">
+                    Select Date
+                  </Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full justify-start text-left font-normal",
+                          "w-full justify-start text-left font-normal h-11 border-slate-300 hover:border-primary",
                           !selectedDate && "text-muted-foreground"
                         )}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        <CalendarIcon className="mr-3 h-5 w-5" />
                         {selectedDate
                           ? format(selectedDate, "PPP")
                           : "Pick a date"}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
+                    <PopoverContent className="w-auto p-0 shadow-md border border-slate-200">
                       <Calendar
                         mode="single"
                         selected={selectedDate}
@@ -219,24 +241,27 @@ const Appointment = () => {
                           date.getDay() === 0 ||
                           date.getDay() === 6
                         }
+                        className="rounded-md checked:text-white!important hover:shadow-md"
                       />
                     </PopoverContent>
                   </Popover>
                 </div>
 
                 <div>
-                  <Label>Select Time</Label>
+                  <Label className="text-base mb-1.5 block font-medium">
+                    Select Time
+                  </Label>
                   <Select
                     value={selectedTime}
                     onValueChange={setSelectedTime}
                     disabled={!selectedDate}
                     required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11 border-slate-300 hover:border-primary focus:ring-1 focus:ring-primary">
                       <SelectValue placeholder="Select time slot">
                         {selectedTime ? (
                           <div className="flex items-center">
-                            <Clock className="mr-2 h-4 w-4" />
+                            <Clock className="mr-3 h-5 w-5" />
                             {selectedTime}
                           </div>
                         ) : (
@@ -257,56 +282,29 @@ const Appointment = () => {
                     selectedDate &&
                     selectedTime &&
                     !isSlotAvailable && (
-                      <p className="text-red-500 text-sm mt-1">
+                      <p className="text-red-600 text-sm mt-2 flex items-center">
+                        <AlertCircle className="h-4 w-4 mr-1" />
                         This slot is already booked. Please select another time.
                       </p>
                     )}
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your full name"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Enter your phone number"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="issue">Describe Your Issue</Label>
+                  <Label
+                    htmlFor="issue"
+                    className="text-base mb-1.5 block font-medium"
+                  >
+                    Describe Your Issue
+                  </Label>
                   <Textarea
                     id="issue"
                     value={issue}
                     onChange={(e) => setIssue(e.target.value)}
                     placeholder="Briefly describe your condition or reason for the appointment"
-                    rows={3}
+                    rows={8}
+                    className="min-h-[200px] resize-none border-slate-300 hover:border-primary focus:ring-1 focus:ring-primary"
                     required
                   />
                 </div>
@@ -315,7 +313,7 @@ const Appointment = () => {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full mt-6 h-12 text-base font-medium transition-all hover:shadow-md"
               disabled={
                 isSubmitting ||
                 !isSlotAvailable ||
@@ -324,7 +322,7 @@ const Appointment = () => {
                 !selectedTime
               }
             >
-              {isSubmitting ? "Booking..." : "Book Appointment"}
+              {isSubmitting ? "Processing..." : "Book Appointment"}
             </Button>
           </form>
         </CardContent>

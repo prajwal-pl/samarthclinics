@@ -397,7 +397,7 @@ const Home: React.FC = () => {
                   </h1>
                   <div className="d-flex justify-content-center flex-wrap">
                     <a
-                      href="https://docs.google.com/forms/d/1Pykg91TjGn-U420oOcn8tlVYACLK66sepwleTdOSrec/edit"
+                      href="/form"
                       className="btn btn-primary btn-pill mr-3 mb-3"
                       target="_blank"
                       rel="noopener noreferrer"

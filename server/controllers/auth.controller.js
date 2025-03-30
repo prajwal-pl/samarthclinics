@@ -27,16 +27,29 @@ export const authFunction = async (req, res) => {
 };
 
 export const getBasicUserInfo = async (req, res) => {
-  const { id } = req.body;
+  const { email, phoneNumber, full_name } = req.body;
   try {
-    const user = await User.findById(id, {
-      email: 1,
-      clerkId: 1,
-      full_name: 1,
+    const user = await User.findOne({
+      email,
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      const newUser = new User({
+        email,
+        phoneNumber,
+        role: "user",
+        full_name,
+      });
+
+      newUser
+        .save()
+        .then((savedUser) => {
+          res.status(201).json(savedUser);
+        })
+        .catch((error) => {
+          console.log(error);
+          res.status(500).json({ message: "Internal server error" });
+        });
     }
 
     res.status(200).json(user);

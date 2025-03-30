@@ -31,14 +31,22 @@ export const GetBooking = async (req, res) => {
 };
 
 export const CreateBooking = async (req, res) => {
-  const booking = req.body;
+  const { date, time, user, doctor, issue } = req.body;
 
-  const newBooking = new Booking(booking);
+  const newBooking = new Booking({
+    date,
+    time,
+    user,
+    doctor,
+    issue,
+  });
 
   try {
     await newBooking.save();
 
-    res.status(201).json(newBooking);
+    res
+      .status(201)
+      .json({ message: "Booking created successfully", booking: newBooking });
   } catch (error) {
     res.status(409).json({ message: error.message });
   }
@@ -79,7 +87,10 @@ export const DeleteBooking = async (req, res) => {
 };
 
 export const slotAvailability = async (req, res) => {
-  const { doctorId, date, time } = req.body;
+  const { date, time, doctorId } = req.body;
+  if (!doctorId) {
+    return res.status(400).json({ message: "Doctor ID is required" });
+  }
 
   try {
     const booking = await Booking.findOne({ doctor: doctorId, date, time });
