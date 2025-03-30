@@ -9,25 +9,25 @@ export const getPrescriptions = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const role = await User.findById(userId).select("role");
+    const user = await User.findById(userId).select("role");
 
-    if (!role) {
-      return res.status(404).json({ message: "Role not found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    if (role !== "doctor") {
-      return res.status(403).json({ message: "Forbidden" });
+    if (user.role !== "doctor") {
+      return res
+        .status(403)
+        .json({ message: "Forbidden - doctor access required" });
     }
 
     const prescriptions = await Prescription.find({
       doctor: userId,
-    });
+    })
+      .populate("patient", "full_name email")
+      .sort({ dateIssued: -1 });
 
-    if (!prescriptions) {
-      return res.status(404).json({ message: "Prescriptions not found" });
-    }
-
-    res.status(200).json(prescriptions);
+    return res.status(200).json(prescriptions);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -35,7 +35,8 @@ export const getPrescriptions = async (req, res) => {
 };
 
 export const createPrescription = async (req, res) => {
-  const { prescriptionText, patientId, notes, paymentAmount } = req.body;
+  const { prescriptionText, patientId, notes, paymentAmount, expiryDate } =
+    req.body;
   try {
     const userId = req.userId;
 
@@ -45,14 +46,14 @@ export const createPrescription = async (req, res) => {
 
     const user = await User.findById(userId);
 
-    const role = await User.findById(userId).select("role");
-
-    if (!role) {
-      return res.status(404).json({ message: "Role not found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    if (role !== "doctor") {
-      return res.status(403).json({ message: "Forbidden" });
+    if (user.role !== "doctor") {
+      return res
+        .status(403)
+        .json({ message: "Forbidden - doctor access required" });
     }
 
     const prescription = await Prescription.create({
@@ -86,14 +87,16 @@ export const getPatientPaymentStatus = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const role = await User.findById(userId).select("role");
+    const user = await User.findById(userId).select("role");
 
-    if (!role) {
-      return res.status(404).json({ message: "Role not found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    if (role !== "doctor") {
-      return res.status(403).json({ message: "Forbidden" });
+    if (user.role !== "doctor") {
+      return res
+        .status(403)
+        .json({ message: "Forbidden - doctor access required" });
     }
 
     const prescriptions = await Prescription.find({
@@ -124,10 +127,16 @@ export const updatePaymentStatus = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const role = await User.findById(userId).select("role");
+    const user = await User.findById(userId).select("role");
 
-    if (!role || role !== "doctor") {
-      return res.status(403).json({ message: "Forbidden" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.role !== "doctor") {
+      return res
+        .status(403)
+        .json({ message: "Forbidden - doctor access required" });
     }
 
     const prescription = await Prescription.findById(prescriptionId);

@@ -10,7 +10,9 @@ export const GetBookings = async (req, res) => {
     if (mongoose.Types.ObjectId.isValid(id)) {
       const bookings = await Booking.find({
         doctor: id,
-      });
+      })
+        .populate("user", "full_name email")
+        .sort({ date: -1, time: -1 });
 
       if (!bookings || bookings.length === 0) {
         return res.status(404).json({ message: "No bookings found" });
@@ -28,17 +30,16 @@ export const GetBookings = async (req, res) => {
       return res.status(404).json({ message: "Doctor not found" });
     }
 
-    console.log("Found doctor:", doctor);
-
     const bookings = await Booking.find({
       doctor: doctor._id,
-    });
+    })
+      .populate("user", "full_name email")
+      .sort({ date: -1, time: -1 });
 
     if (!bookings || bookings.length === 0) {
       return res.status(404).json({ message: "No bookings found" });
     }
 
-    console.log("Found bookings:", bookings);
     res.status(200).json(bookings);
   } catch (error) {
     console.error("Error in GetBookings:", error);

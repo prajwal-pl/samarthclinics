@@ -212,7 +212,7 @@ const DoctorAppointments = () => {
   ) => {
     try {
       await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/bookings/update/${id}`,
+        `${import.meta.env.VITE_BACKEND_URL}/booking/update/${id}`,
         { status }
       );
       setBookings(
@@ -229,7 +229,7 @@ const DoctorAppointments = () => {
   const handleUpdateBooking = async (updatedBooking: Booking) => {
     try {
       await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/bookings/update/${
+        `${import.meta.env.VITE_BACKEND_URL}/booking/update/${
           updatedBooking._id
         }`,
         updatedBooking

@@ -23,6 +23,7 @@ import "slick-carousel/slick/slick-theme.css";
 import { Menu, X } from "lucide-react";
 import Map from "../components/Map";
 import { SignOutButton, useUser } from "@clerk/clerk-react";
+import { isAuthenticated } from "@/lib/handler";
 
 // Add a custom hook for counter animation
 const useCounter = (end: number, duration: number = 2000) => {
@@ -73,11 +74,21 @@ const Home: React.FC = () => {
   const typed = useRef<Typed | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const { isSignedIn } = useUser(); // Add state for menu toggle
+  const [authenticated, setAuthenticated] = useState(false);
 
   // Initialize counters
   const customersCounter = useCounter(200);
   const yearsCounter = useCounter(2);
   const satisfactionCounter = useCounter(100);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const isAuth = await isAuthenticated();
+    setAuthenticated(isAuth ?? false);
+  };
 
   useEffect(() => {
     // Initialize AOS
@@ -256,31 +267,6 @@ const Home: React.FC = () => {
       </div>
 
       <header className="site-navbar" role="banner">
-        {/* <div
-          className="site-mobile-menu"
-          style={{
-            ...mobileMenuStyle,
-            transform: menuOpen ? "translateX(0%)" : "translateX(110%)",
-            zIndex: 2100,
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="site-mobile-menu-header">
-            <div className="site-mobile-menu-close mt-3">
-              <span
-                onClick={handleMenuToggle}
-                className="icon-close2 js-menu-toggle"
-                style={{ cursor: "pointer" }}
-              >
-                <X />
-              </span>
-            </div>
-          </div>
-          <div className="site-mobile-menu-body">
-            
-          </div>
-        </div> */}
-
         <div className="container">
           <div className="row align-items-center">
             <div className="col-8 col-xl-4">
@@ -350,32 +336,33 @@ const Home: React.FC = () => {
                       <span>संपर्क करें</span>
                     </a>
                   </li>
-                  <li>
-                    <a href="/sign-in">
-                      <span>Sign in</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/sign-up">
-                      <span>Sign up</span>
-                    </a>
-                  </li>
+                  {isSignedIn ? (
+                    <li style={{ padding: "10px 0" }}>
+                      <SignOutButton />
+                    </li>
+                  ) : (
+                    <>
+                      <li style={{ padding: "10px 0" }}>
+                        <a
+                          href="/sign-in"
+                          style={{ color: "#000", textDecoration: "none" }}
+                        >
+                          Sign In
+                        </a>
+                      </li>
+                      <li style={{ padding: "10px 0" }}>
+                        <a
+                          href="/sign-up"
+                          style={{ color: "#000", textDecoration: "none" }}
+                        >
+                          Sign Up
+                        </a>
+                      </li>
+                    </>
+                  )}
                 </ul>
               </nav>
             </div>
-            {/* <div
-              className="d-inline-block d-xl-none ml-md-0 mr-auto py-3"
-              style={{ position: "relative", top: "3px" }}
-            >
-              <a
-                href="#"
-                className="site-menu-toggle js-menu-toggle text-white"
-              >
-                <span className="icon-menu h3">
-                  <Menu />
-                </span>
-              </a>
-            </div> */}
           </div>
         </div>
       </header>
@@ -397,7 +384,7 @@ const Home: React.FC = () => {
                   </h1>
                   <div className="d-flex justify-content-center flex-wrap">
                     <a
-                      href="/form"
+                      href={`${authenticated ? "/appointments" : "/form"}`}
                       className="btn btn-primary btn-pill mr-3 mb-3"
                       target="_blank"
                       rel="noopener noreferrer"

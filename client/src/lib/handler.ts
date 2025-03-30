@@ -27,3 +27,21 @@ export const userAuth = async ({
     console.log(error);
   }
 };
+
+export const isAuthenticated = async () => {
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    return false;
+  }
+  try {
+    const res = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URL}/auth/${userId}`
+    );
+    if (res.data) {
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.log(error);
+  }
+};

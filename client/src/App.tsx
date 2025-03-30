@@ -9,6 +9,7 @@ import Signin from "./pages/sign-in";
 import Role from "./pages/Role";
 import Appointments from "./pages/Appointments";
 import DataForm from "./components/DataForm";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
       <Route path="/role" element={<Role />} />
       <Route path="/form" element={<DataForm />} />
       <Route path="/appointments" element={<Appointments />} />
+      <Route path="/dashboard" element={<Dashboard />} />
     </Routes>
   );
 }
