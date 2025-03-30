@@ -143,7 +143,9 @@ export const updatePaymentStatus = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const user = await User.findById(userId).select("role");
+    const user = await User.findOne({
+      clerkId: userId,
+    }).select("role");
 
     if (!user) {
       console.log("User not found for ID:", userId);
@@ -161,12 +163,6 @@ export const updatePaymentStatus = async (req, res) => {
 
     if (!prescription) {
       return res.status(404).json({ message: "Prescription not found" });
-    }
-
-    if (prescription.doctor.toString() !== userId) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to update this prescription" });
     }
 
     const updatedPrescription = await Prescription.findByIdAndUpdate(

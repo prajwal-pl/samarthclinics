@@ -188,11 +188,12 @@ const Dashboard: React.FC = () => {
 
       try {
         const headers = await getAuthHeaders();
+        const userId = user?.id
 
         await axios.patch(
           `${
             import.meta.env.VITE_BACKEND_URL
-          }/prescription/payment/${prescriptionId}`,
+          }/prescription/${userId}/payment/${prescriptionId}`,
           {
             paymentStatus: "paid",
             paymentDate: new Date().toISOString(),
