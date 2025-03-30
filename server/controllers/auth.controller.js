@@ -58,3 +58,35 @@ export const getBasicUserInfo = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const getUserDetails = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "No user found" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getUserByClerkId = async (req, res) => {
+  const { clerkId } = req.params;
+  try {
+    const user = await User.findOne({ clerkId });
+
+    if (!user) {
+      return res.status(404).json({ message: "No user found" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

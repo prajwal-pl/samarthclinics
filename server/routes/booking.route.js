@@ -10,11 +10,11 @@ import {
 
 const router = express.Router();
 
-router.get("/", GetBookings);
-router.get("/:id", GetBooking);
+router.get("/single/:id", GetBooking);
+router.get("/:id", GetBookings);
 router.post("/create", CreateBooking);
 router.post("/update/:id", UpdateBooking);
 router.delete("/delete/:id", DeleteBooking);
-router.post("/time-slot", slotAvailability); // Assuming this is for getting available time slots
+router.post("/time-slot", slotAvailability);
 
 export default router;

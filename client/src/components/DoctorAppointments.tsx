@@ -63,18 +63,23 @@ import {
   isBefore,
   isAfter,
 } from "date-fns";
-import { cn } from "@/lib/utils";
+import { useSession, useUser } from "@clerk/clerk-react";
 
 interface Booking {
   _id: string;
   doctor: string;
   date: string;
   time: string;
-  patientName: string;
-  patientEmail: string;
-  patientPhone: string;
+  user: string;
   issue: string;
   status: "scheduled" | "completed" | "cancelled";
+}
+
+interface Userdetails {
+  _id: string;
+  email: string;
+  phoneNumber: string;
+  full_name: string;
 }
 
 const DoctorAppointments = () => {
@@ -87,83 +92,18 @@ const DoctorAppointments = () => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [userDetails, setUserDetails] = useState<Userdetails[]>([]);
 
-  // Mock data for appointments
-  const mockBookings: Booking[] = [
-    {
-      _id: "1",
-      doctor: "current-doctor-id",
-      date: format(new Date(), "yyyy-MM-dd"), // Today
-      time: "10:00",
-      patientName: "John Doe",
-      patientEmail: "john.doe@example.com",
-      patientPhone: "555-123-4567",
-      issue: "Lower back pain after lifting weights",
-      status: "scheduled",
-    },
-    {
-      _id: "2",
-      doctor: "current-doctor-id",
-      date: format(new Date(), "yyyy-MM-dd"), // Today
-      time: "14:30",
-      patientName: "Jane Smith",
-      patientEmail: "jane.smith@example.com",
-      patientPhone: "555-987-6543",
-      issue: "Shoulder rehabilitation after surgery",
-      status: "scheduled",
-    },
-    {
-      _id: "3",
-      doctor: "current-doctor-id",
-      date: format(addDays(new Date(), 1), "yyyy-MM-dd"), // Tomorrow
-      time: "09:15",
-      patientName: "Robert Johnson",
-      patientEmail: "robert.j@example.com",
-      patientPhone: "555-555-5555",
-      issue: "Knee pain when walking up stairs",
-      status: "scheduled",
-    },
-    {
-      _id: "4",
-      doctor: "current-doctor-id",
-      date: format(addDays(new Date(), 3), "yyyy-MM-dd"), // 3 days from now
-      time: "11:00",
-      patientName: "Sarah Williams",
-      patientEmail: "sarah.w@example.com",
-      patientPhone: "555-444-3333",
-      issue: "Sprained ankle from running",
-      status: "scheduled",
-    },
-    {
-      _id: "5",
-      doctor: "current-doctor-id",
-      date: format(addDays(new Date(), -2), "yyyy-MM-dd"), // 2 days ago
-      time: "13:45",
-      patientName: "Michael Brown",
-      patientEmail: "michael.b@example.com",
-      patientPhone: "555-222-1111",
-      issue: "Tennis elbow treatment",
-      status: "completed",
-    },
-    {
-      _id: "6",
-      doctor: "current-doctor-id",
-      date: format(addDays(new Date(), -1), "yyyy-MM-dd"), // Yesterday
-      time: "16:30",
-      patientName: "Emily Davis",
-      patientEmail: "emily.d@example.com",
-      patientPhone: "555-888-9999",
-      issue: "Posture assessment and correction",
-      status: "cancelled",
-    },
-  ];
+  const { user, isLoaded } = useUser();
+  const { session } = useSession();
 
-  // Doctor ID should come from auth context in a real app
-  const doctorId = "current-doctor-id";
+  const doctorId = user?.id || session?.user.id;
 
   useEffect(() => {
-    fetchBookings();
-  }, []);
+    if (isLoaded && doctorId) {
+      fetchBookings();
+    }
+  }, [doctorId, isLoaded]);
 
   useEffect(() => {
     filterBookings();
@@ -172,21 +112,61 @@ const DoctorAppointments = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      // Instead of making an API call, use the mock data
-      setTimeout(() => {
-        setBookings(mockBookings);
-        setLoading(false);
-      }, 500); // Add a small delay to simulate network request
+
+      // First, get the doctor's MongoDB ID from the clerk ID
+      const doctorResponse = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/clerk/${doctorId}`
+      );
+
+      const doctorMongoId = doctorResponse.data._id;
+
+      // Now use the MongoDB ID to fetch bookings
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/booking/${doctorMongoId}`
+      );
+
+      const data = response.data;
+      setBookings(data);
+
+      // Debug log to see the data structure
+      console.log("Bookings received:", data);
+
+      const uniqueUserIds = [
+        ...new Set(data.map((booking: Booking) => booking.user)),
+      ] as string[];
+
+      console.log("Unique user IDs:", uniqueUserIds);
+
+      await fetchUserDetails(uniqueUserIds);
     } catch (error) {
       console.error("Error fetching bookings:", error);
+    } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserDetails = async (userIds: string[]) => {
+    try {
+      console.log("Fetching details for users:", userIds);
+
+      const userPromises = userIds.map((userId) =>
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/${userId}`)
+      );
+
+      const userResponses = await Promise.all(userPromises);
+      const users = userResponses.map((response) => response.data);
+
+      console.log("User details received:", users);
+
+      setUserDetails(users);
+    } catch (error) {
+      console.error("Error fetching user details:", error);
     }
   };
 
   const filterBookings = () => {
     let filtered = [...bookings];
 
-    // Filter by tab selection
     if (activeTab === "today") {
       filtered = filtered.filter((booking) => isToday(parseISO(booking.date)));
     } else if (activeTab === "upcoming") {
@@ -199,24 +179,24 @@ const DoctorAppointments = () => {
       filtered = filtered.filter((booking) => booking.status === "completed");
     }
 
-    // Filter by search term
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (booking) =>
-          booking.patientName.toLowerCase().includes(term) ||
-          booking.patientPhone.includes(term) ||
-          booking.patientEmail.toLowerCase().includes(term)
-      );
+      filtered = filtered.filter((booking) => {
+        const user = userDetails.find((u) => u._id === booking.user);
+        return (
+          user?.full_name?.toLowerCase().includes(term) ||
+          user?.phoneNumber?.includes(term) ||
+          user?.email?.toLowerCase().includes(term) ||
+          booking.issue.toLowerCase().includes(term)
+        );
+      });
     }
 
-    // Filter by selected date
     if (dateFilter) {
       const filterDate = format(dateFilter, "yyyy-MM-dd");
       filtered = filtered.filter((booking) => booking.date === filterDate);
     }
 
-    // Sort by date and time
     filtered.sort((a, b) => {
       const dateA = new Date(`${a.date}T${a.time}`);
       const dateB = new Date(`${b.date}T${b.time}`);
@@ -231,7 +211,10 @@ const DoctorAppointments = () => {
     status: "scheduled" | "completed" | "cancelled"
   ) => {
     try {
-      await axios.put(`/api/bookings/${id}`, { status });
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/bookings/update/${id}`,
+        { status }
+      );
       setBookings(
         bookings.map((booking) =>
           booking._id === id ? { ...booking, status } : booking
@@ -245,7 +228,12 @@ const DoctorAppointments = () => {
 
   const handleUpdateBooking = async (updatedBooking: Booking) => {
     try {
-      await axios.put(`/api/bookings/${updatedBooking._id}`, updatedBooking);
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/bookings/update/${
+          updatedBooking._id
+        }`,
+        updatedBooking
+      );
       setBookings(
         bookings.map((booking) =>
           booking._id === updatedBooking._id ? updatedBooking : booking
@@ -259,7 +247,9 @@ const DoctorAppointments = () => {
 
   const handleDeleteBooking = async (id: string) => {
     try {
-      await axios.delete(`/api/bookings/${id}`);
+      await axios.delete(
+        `${import.meta.env.VITE_BACKEND_URL}/booking/delete/${id}`
+      );
       setBookings(bookings.filter((booking) => booking._id !== id));
       setIsConfirmDialogOpen(false);
     } catch (error) {
@@ -270,13 +260,13 @@ const DoctorAppointments = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "scheduled":
-        return <Badge className="bg-blue-500">Scheduled</Badge>;
+        return <Badge className="bg-blue-500">Pending</Badge>;
       case "completed":
-        return <Badge className="bg-green-500">Completed</Badge>;
+        return <Badge className="bg-green-500">Confirmed</Badge>;
       case "cancelled":
         return <Badge className="bg-red-500">Cancelled</Badge>;
       default:
-        return <Badge>Unknown</Badge>;
+        return <Badge>Pending</Badge>;
     }
   };
 
@@ -285,6 +275,10 @@ const DoctorAppointments = () => {
     if (isToday(date)) return "Today";
     if (isTomorrow(date)) return "Tomorrow";
     return format(date, "PPP");
+  };
+
+  const getUserDetailsById = (userId: string) => {
+    return userDetails.find((user) => user._id === userId);
   };
 
   return (
@@ -370,79 +364,81 @@ const DoctorAppointments = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredBookings.map((booking) => (
-                <TableRow key={booking._id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      <div className="bg-slate-100 p-2 rounded-full">
-                        <User className="h-4 w-4" />
+              {filteredBookings.map((booking) => {
+                const userDetail = getUserDetailsById(booking.user);
+                return (
+                  <TableRow key={booking._id}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <div className="bg-slate-100 p-2 rounded-full">
+                          <User className="h-4 w-4" />
+                        </div>
+                        {userDetail?.full_name || "Unknown"}
                       </div>
-                      {booking.patientName}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <span className="flex items-center">
-                        <CalendarIcon className="mr-1 h-4 w-4 text-muted-foreground" />
-                        {getDateLabel(booking.date)}
-                      </span>
-                      <span className="flex items-center text-sm text-muted-foreground">
-                        <Clock className="mr-1 h-3 w-3" />
-                        {booking.time}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <span className="flex items-center text-sm">
-                        <Phone className="mr-1 h-3 w-3 text-muted-foreground" />
-                        {booking.patientPhone}
-                      </span>
-                      <span className="flex items-center text-sm">
-                        <Mail className="mr-1 h-3 w-3 text-muted-foreground" />
-                        {booking.patientEmail}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="max-w-xs truncate" title={booking.issue}>
-                      {booking.issue.substring(0, 50)}
-                      {booking.issue.length > 50 ? "..." : ""}
-                    </div>
-                  </TableCell>
-                  <TableCell>{getStatusBadge(booking.status)}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setSelectedBooking(booking);
-                          setIsEditDialogOpen(true);
-                        }}
-                      >
-                        <FileEdit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setSelectedBooking(booking);
-                          setIsConfirmDialogOpen(true);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="flex items-center">
+                          <CalendarIcon className="mr-1 h-4 w-4 text-muted-foreground" />
+                          {getDateLabel(booking.date)}
+                        </span>
+                        <span className="flex items-center text-sm text-muted-foreground">
+                          <Clock className="mr-1 h-3 w-3" />
+                          {booking.time}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <span className="flex items-center text-sm">
+                          <Phone className="mr-1 h-3 w-3 text-muted-foreground" />
+                          {userDetail?.phoneNumber || "N/A"}
+                        </span>
+                        <span className="flex items-center text-sm">
+                          <Mail className="mr-1 h-3 w-3 text-muted-foreground" />
+                          {userDetail?.email || "N/A"}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="max-w-xs truncate" title={booking.issue}>
+                        {booking.issue.substring(0, 50)}
+                        {booking.issue.length > 50 ? "..." : ""}
+                      </div>
+                    </TableCell>
+                    <TableCell>{getStatusBadge(booking.status)}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setSelectedBooking(booking);
+                            setIsEditDialogOpen(true);
+                          }}
+                        >
+                          <FileEdit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setSelectedBooking(booking);
+                            setIsConfirmDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
       )}
 
-      {/* Edit Booking Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -456,13 +452,10 @@ const DoctorAppointments = () => {
               <div>
                 <Label>Patient Name</Label>
                 <Input
-                  value={selectedBooking.patientName}
-                  onChange={(e) =>
-                    setSelectedBooking({
-                      ...selectedBooking,
-                      patientName: e.target.value,
-                    })
+                  value={
+                    getUserDetailsById(selectedBooking.user)?.full_name || ""
                   }
+                  disabled
                 />
               </div>
 
@@ -521,7 +514,6 @@ const DoctorAppointments = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Confirm Delete Dialog */}
       <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>

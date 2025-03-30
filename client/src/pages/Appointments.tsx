@@ -11,12 +11,9 @@ const Appointments = () => {
 
   const fetchRole = async () => {
     try {
-      console.log(userId);
       const res = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/role/${userId}`
       );
-
-      console.log(res.data.role);
 
       if (res.data.role) {
         setRole(res.data.role);

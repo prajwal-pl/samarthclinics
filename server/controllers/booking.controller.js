@@ -1,16 +1,48 @@
 import { Booking } from "../models/booking.js";
+import User from "../models/user.js";
+import mongoose from "mongoose";
 
 export const GetBookings = async (req, res) => {
-  try {
-    const bookings = await Booking.find();
+  const { id } = req.params;
 
-    if (!bookings) {
+  try {
+    // Check if the id is a MongoDB ObjectId (doctor's MongoDB ID directly)
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      const bookings = await Booking.find({
+        doctor: id,
+      });
+
+      if (!bookings || bookings.length === 0) {
+        return res.status(404).json({ message: "No bookings found" });
+      }
+
+      return res.status(200).json(bookings);
+    }
+
+    // Otherwise, assume it's a clerkId
+    const doctor = await User.findOne({
+      clerkId: id,
+    });
+
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    console.log("Found doctor:", doctor);
+
+    const bookings = await Booking.find({
+      doctor: doctor._id,
+    });
+
+    if (!bookings || bookings.length === 0) {
       return res.status(404).json({ message: "No bookings found" });
     }
 
+    console.log("Found bookings:", bookings);
     res.status(200).json(bookings);
   } catch (error) {
-    res.status(404).json({ message: error.message });
+    console.error("Error in GetBookings:", error);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -77,7 +109,7 @@ export const DeleteBooking = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id))
       return res.status(404).send(`No booking with id: ${id}`);
 
-    await Booking.findByIdAndRemove(id);
+    await Booking.findByIdAndDelete(id);
 
     res.json({ message: "Booking deleted successfully." });
   } catch (error) {
