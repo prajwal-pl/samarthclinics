@@ -1,15 +1,20 @@
+import { Booking } from "../models/booking.js";
 import Prescription from "../models/prescription.js";
 import User from "../models/user.js";
+import crypto from "crypto";
+import mongoose from "mongoose";
 
 export const getPrescriptions = async (req, res) => {
   try {
-    const userId = req.userId;
+    const { id: userId } = req.params;
 
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const user = await User.findById(userId).select("role");
+    const user = await User.findOne({
+      clerkId: userId,
+    }).select("role");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -22,7 +27,7 @@ export const getPrescriptions = async (req, res) => {
     }
 
     const prescriptions = await Prescription.find({
-      doctor: userId,
+      doctor: user.id,
     })
       .populate("patient", "full_name email")
       .sort({ dateIssued: -1 });
@@ -35,43 +40,53 @@ export const getPrescriptions = async (req, res) => {
 };
 
 export const createPrescription = async (req, res) => {
-  const { prescriptionText, patientId, notes, paymentAmount, expiryDate } =
-    req.body;
+  const {
+    prescriptionText,
+    patientId,
+    notes,
+    paymentAmount,
+    expiryDate,
+    appointmentId,
+  } = req.body;
   try {
-    const userId = req.userId;
+    const { id: userId } = req.params;
 
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    const user = await User.findOne({
+      clerkId: userId,
+    });
 
     if (user.role !== "doctor") {
       return res
         .status(403)
         .json({ message: "Forbidden - doctor access required" });
     }
+    // Generate unique shareable ID
+    const shareableId = crypto.randomBytes(10).toString("hex");
 
     const prescription = await Prescription.create({
-      doctor: userId,
+      doctor: user.id,
       prescriptionText,
       patient: patientId,
       notes: notes || "",
       expiryDate: expiryDate || null,
       paymentAmount: paymentAmount || null,
+      appointment: appointmentId || null,
+      shareableId,
     });
 
     await user.updateOne({
       $push: { prescriptions: prescription._id },
     });
 
-    res
-      .status(201)
-      .json({ message: "Prescription created successfully", prescription });
+    res.status(201).json({
+      message: "Prescription created successfully",
+      prescription,
+      shareableUrl: `/prescription/share/${shareableId}`,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -80,7 +95,7 @@ export const createPrescription = async (req, res) => {
 
 export const getPatientPaymentStatus = async (req, res) => {
   try {
-    const userId = req.userId;
+    const { id: userId } = req.params;
     const { patientId } = req.params;
 
     if (!userId) {
@@ -102,7 +117,7 @@ export const getPatientPaymentStatus = async (req, res) => {
     const prescriptions = await Prescription.find({
       doctor: userId,
       patient: patientId,
-    }).populate("patient", "full_name email");
+    });
 
     if (!prescriptions || prescriptions.length === 0) {
       return res
@@ -119,21 +134,24 @@ export const getPatientPaymentStatus = async (req, res) => {
 
 export const updatePaymentStatus = async (req, res) => {
   try {
-    const userId = req.userId;
+    const { id: userId } = req.params;
     const { prescriptionId } = req.params;
     const { paymentStatus, paymentDate, paymentAmount } = req.body;
 
     if (!userId) {
+      console.log("Unauthorized: No userId in request");
       return res.status(401).json({ message: "Unauthorized" });
     }
 
     const user = await User.findById(userId).select("role");
 
     if (!user) {
+      console.log("User not found for ID:", userId);
       return res.status(404).json({ message: "User not found" });
     }
 
     if (user.role !== "doctor") {
+      console.log("Forbidden - user role is not doctor:", user.role);
       return res
         .status(403)
         .json({ message: "Forbidden - doctor access required" });
@@ -166,6 +184,82 @@ export const updatePaymentStatus = async (req, res) => {
       message: "Payment status updated successfully",
       prescription: updatedPrescription,
     });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getPatientsWithAppointments = async (req, res) => {
+  try {
+    const { id: userId } = req.params;
+
+    console.log("User ID from request:", userId);
+
+    if (!userId) {
+      console.log(
+        "Unauthorized: No userId in request for getPatientsWithAppointments"
+      );
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = await User.findOne({
+      clerkId: userId,
+    });
+
+    if (!user) {
+      console.log("User not found for ID:", userId);
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.role !== "doctor") {
+      console.log("Forbidden - user role is not doctor:", user.role);
+      return res
+        .status(403)
+        .json({ message: "Forbidden - doctor access required" });
+    }
+
+    // Find patients who have appointments with the doctor
+    const patientsWithDetails = await Booking.find({ doctor: user.id }).sort({
+      dateIssued: -1,
+    });
+
+    const patients = await Promise.all(
+      patientsWithDetails.map(async (booking) => {
+        const patient = await User.findById(booking.user).select(
+          "full_name email phoneNumber"
+        );
+        return {
+          ...patient._doc,
+          appointmentDate: booking.date,
+          appointmentTime: booking.time,
+          appointmentStatus: booking.status,
+        };
+      })
+    );
+
+    console.log(patients);
+
+    res.status(200).json(patients);
+  } catch (error) {
+    console.log("Error in getPatientsWithAppointments:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getPrescriptionByShareableId = async (req, res) => {
+  try {
+    const { shareableId } = req.params;
+
+    const prescription = await Prescription.findOne({ shareableId })
+      .populate("doctor", "full_name email")
+      .populate("patient", "full_name");
+
+    if (!prescription) {
+      return res.status(404).json({ message: "Prescription not found" });
+    }
+
+    res.status(200).json(prescription);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

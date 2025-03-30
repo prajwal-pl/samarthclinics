@@ -18,6 +18,10 @@ const prescriptionSchema = new Schema(
       ref: "User",
       required: true,
     },
+    appointment: {
+      type: Schema.Types.ObjectId,
+      ref: "Appointment",
+    },
     dateIssued: {
       type: Date,
       default: Date.now,
@@ -28,7 +32,11 @@ const prescriptionSchema = new Schema(
     expiryDate: {
       type: Date,
     },
-
+    shareableId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     paymentStatus: {
       type: String,
       enum: ["pending", "paid"],

@@ -45,3 +45,19 @@ export const isAuthenticated = async () => {
     console.log(error);
   }
 };
+
+export const fetchAppointmentId = async (userId: string, patientId: string) => {
+  try {
+    const res = await axios.get(
+      `${
+        import.meta.env.VITE_BACKEND_URL
+      }/booking/${userId}/details/${patientId}`
+    );
+
+    console.log(res.data);
+
+    return res.data;
+  } catch (error) {
+    console.log(error);
+  }
+};

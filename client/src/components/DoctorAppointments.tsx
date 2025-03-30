@@ -515,7 +515,7 @@ const DoctorAppointments = () => {
               Cancel
             </Button>
             <Button
-              variant="destructive"
+              className="text-red-500 bg-gray-100"
               onClick={() =>
                 selectedBooking && handleDeleteBooking(selectedBooking._id)
               }

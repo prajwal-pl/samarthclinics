@@ -2,6 +2,8 @@ import express from "express";
 import {
   createPrescription,
   getPatientPaymentStatus,
+  getPatientsWithAppointments,
+  getPrescriptionByShareableId,
   getPrescriptions,
   updatePaymentStatus,
 } from "../controllers/prescription.controller.js";
@@ -9,13 +11,11 @@ import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/", authMiddleware, getPrescriptions);
-router.post("/create", authMiddleware, createPrescription);
-router.get(
-  "/patient/:patientId/payments",
-  authMiddleware,
-  getPatientPaymentStatus
-);
-router.patch("/payment/:prescriptionId", authMiddleware, updatePaymentStatus);
+router.post("/create/:id", createPrescription);
+router.get("/:id/patients-with-appointments", getPatientsWithAppointments);
+router.get("/:id/patient/:patientId/payments", getPatientPaymentStatus);
+router.patch("/:id/payment/:prescriptionId", updatePaymentStatus);
+router.get("/share/:shareableId", getPrescriptionByShareableId);
+router.get("/:id", getPrescriptions);
 
 export default router;

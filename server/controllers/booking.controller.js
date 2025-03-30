@@ -142,3 +142,23 @@ export const slotAvailability = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const getBookingId = async (req, res) => {
+  const { userId, doctorId } = req.params;
+  try {
+    const booking = await Booking.findOne({
+      user: userId,
+      doctor: doctorId,
+    });
+
+    if (!booking) {
+      return res.status(404).json({ message: "No booking found" });
+    }
+
+    const bookingId = booking._id.toString(); // Convert ObjectId to string
+    res.status(200).json({ bookingId });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};

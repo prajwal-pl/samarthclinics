@@ -99,9 +99,10 @@ const Dashboard: React.FC = () => {
 
       // Get auth headers
       const headers = await getAuthHeaders();
+      const userId = user.id;
 
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/prescription`,
+        `${import.meta.env.VITE_BACKEND_URL}/prescription/${userId}`,
         { headers }
       );
       console.log("Prescriptions data:", response.data);
@@ -662,7 +663,7 @@ const Dashboard: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            $
+                            ₹
                             {prescription.paymentAmount
                               ? prescription.paymentAmount.toFixed(2)
                               : "0.00"}
@@ -672,9 +673,7 @@ const Dashboard: React.FC = () => {
                           <button
                             className="text-blue-600 hover:text-blue-900 mr-3"
                             onClick={() =>
-                              alert(
-                                `View prescription details for ID: ${prescription._id}`
-                              )
+                              (window.location.href = "/prescriptions")
                             }
                           >
                             View
