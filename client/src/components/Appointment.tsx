@@ -174,13 +174,25 @@ const Appointment = () => {
       )}
 
       <Card className="shadow-md border-t-4 border-t-primary">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-2xl text-primary">
-            Appointment Details
-          </CardTitle>
-          <CardDescription className="text-base">
-            Fill in the details to book your appointment with our specialists
-          </CardDescription>
+        <CardHeader className="pb-4 flex justify-between items-center">
+          <div>
+            <CardTitle className="text-2xl text-primary">
+              Appointment Details
+            </CardTitle>
+            <CardDescription className="text-base">
+              Fill in the details to book your appointment with our specialists
+            </CardDescription>
+          </div>
+          <div>
+            <Button
+              onClick={() => {
+                window.location.href = "/";
+              }}
+              className="rounded"
+            >
+              Go Back
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-7">

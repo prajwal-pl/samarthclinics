@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import axios from "axios";
 import { useSession, useUser } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 // Types for our data
 interface Appointment {
@@ -46,6 +47,17 @@ const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"appointments" | "prescriptions">(
     "appointments"
   );
+  const userId = localStorage.getItem("userId");
+  const email = localStorage.getItem("email");
+
+  useEffect(() => {
+    if (userId && email) {
+      toast("Only Doctors are allowed to view this", {
+        description: "Book an appointment to get started",
+      });
+      window.location.href = "/appointments";
+    }
+  }, []);
 
   // Helper to get authorization headers
   const getAuthHeaders = useCallback(async () => {
@@ -188,7 +200,7 @@ const Dashboard: React.FC = () => {
 
       try {
         const headers = await getAuthHeaders();
-        const userId = user?.id
+        const userId = user?.id;
 
         await axios.patch(
           `${
@@ -245,9 +257,19 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">
-        Doctor Dashboard
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">
+          Doctor Dashboard
+        </h1>
+        <Button
+          onClick={() => {
+            window.location.href = "/";
+          }}
+          className="rounded"
+        >
+          Go Back
+        </Button>
+      </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

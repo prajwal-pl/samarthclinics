@@ -120,7 +120,7 @@ const TopBar = () => {
               </li>
             </div>
           ) : (
-            <>
+            <div className="space-x-2">
               <li style={{ padding: "10px 0" }}>
                 <a
                   href="/sign-in"
@@ -137,7 +137,7 @@ const TopBar = () => {
                   Doctor Sign Up
                 </a>
               </li>
-            </>
+            </div>
           )}
         </ul>
       </div>
@@ -191,10 +191,10 @@ const TopBar = () => {
                       <li>
                         <a href="#">चिरोप्रैक्टिक थेरेपी</a>
                       </li>
-                      <li className="has-children">
+                      {/* <li className="has-children">
                         <a href="#">ड्रॉपडाउन</a>
                         <ul className="dropdown"></ul>
-                      </li>
+                      </li> */}
                     </ul>
                   </li>
                   <li>

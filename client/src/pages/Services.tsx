@@ -1,6 +1,43 @@
 import TopBar from "@/components/TopBar";
+import { useEffect, useRef } from "react";
+import Typed from "typed.js";
+import AOS from "aos";
 
 const Services = () => {
+  const typedRef = useRef<HTMLSpanElement>(null);
+  const typed = useRef<Typed | null>(null);
+
+  useEffect(() => {
+    // Initialize AOS
+    AOS.init({
+      duration: 1000,
+      once: true,
+    });
+
+    // Initialize Typed.js
+    if (typedRef.current) {
+      typed.current = new Typed(typedRef.current, {
+        strings: [
+          "सालों पुराने दर्द",
+          "सालों पुराने तनाव",
+          "सालों पुराने थकान",
+          "लाइलाज बिमारी",
+        ],
+        typeSpeed: 80,
+        backSpeed: 80,
+        backDelay: 4000,
+        startDelay: 1000,
+        loop: true,
+        showCursor: true,
+      });
+    }
+
+    // Cleanup
+    return () => {
+      typed.current?.destroy();
+    };
+  }, []);
+
   return (
     <div className="site-wrap">
       <TopBar />
@@ -17,11 +54,15 @@ const Services = () => {
               <div className="row justify-content-center mb-4">
                 <div className="col-md-10 text-center">
                   <h1 data-aos="fade-up" className="mb-5">
-                    हम आपके <span className="typed-words"></span>
+                    हम आपके{" "}
+                    <span className="text-pink-400" ref={typedRef}></span>
                   </h1>
 
                   <p data-aos="fade-up" data-aos-delay="100">
-                    <a href="#" className="btn btn-primary btn-pill">
+                    <a
+                      href="/appointments"
+                      className="btn btn-primary btn-pill"
+                    >
                       शुरू करें
                     </a>
                   </p>
