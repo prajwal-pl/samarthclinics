@@ -1,6 +1,7 @@
 import { SignOutButton, useAuth } from "@clerk/clerk-react";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Button } from "./ui/button";
 
 const TopBar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -229,22 +230,28 @@ const TopBar = () => {
                     </>
                   ) : (
                     <>
-                      <li style={{ padding: "10px 0" }}>
-                        <a
-                          href="/sign-in"
+                      <li
+                        className="px-1 text-white"
+                        style={{ padding: "10px 0" }}
+                      >
+                        <Button
+                          onClick={() => {
+                            window.location.href = "/sign-in";
+                          }}
+                          variant={"outline"}
                           style={{ color: "#000", textDecoration: "none" }}
                         >
                           Doctor Sign In
-                        </a>
+                        </Button>
                       </li>
-                      <li style={{ padding: "10px 0" }}>
+                      {/* <li style={{ padding: "10px 0" }}>
                         <a
                           href="/sign-up"
-                          style={{ color: "#000", textDecoration: "none" }}
+                          style={{ color: "#fff", textDecoration: "none" }}
                         >
                           Doctor Sign Up
                         </a>
-                      </li>
+                      </li> */}
                     </>
                   )}
                 </ul>

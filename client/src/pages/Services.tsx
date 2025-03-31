@@ -2,10 +2,14 @@ import TopBar from "@/components/TopBar";
 import { useEffect, useRef } from "react";
 import Typed from "typed.js";
 import AOS from "aos";
+import { useCounter } from "./Home";
 
 const Services = () => {
   const typedRef = useRef<HTMLSpanElement>(null);
   const typed = useRef<Typed | null>(null);
+
+  const experienceCounter = useCounter(14);
+  const usersCounter = useCounter(4500);
 
   useEffect(() => {
     // Initialize AOS
@@ -198,18 +202,36 @@ const Services = () => {
             <div className="row">
               <div className="col-sm-6 col-md-6 col-lg-6">
                 <div className="block-counter-1-item">
-                  <span className="number">
-                    <span data-number="14">0</span>+
+                  <span className="number text-3xl font-bold text-white">
+                    <span
+                      className="block-counter-1-number text-3xl font-bold text-white"
+                      ref={experienceCounter.countRef}
+                      data-number="14"
+                    >
+                      {experienceCounter.count}
+                    </span>
+                    +
                   </span>
-                  <span className="caption">वर्ष का अनुभव</span>
+                  <span className=" text-xl font-semibold text-white">
+                    वर्ष का अनुभव
+                  </span>
                 </div>
               </div>
               <div className="col-sm-6 col-md-6 col-lg-6">
                 <div className="block-counter-1-item">
-                  <span className="number">
-                    <span data-number="4500">0</span>+
+                  <span className="number text-3xl font-bold text-white">
+                    <span
+                      className="text-3xl font-bold text-white"
+                      ref={usersCounter.countRef}
+                      data-number="4500"
+                    >
+                      {usersCounter.count}
+                    </span>
+                    +
                   </span>
-                  <span className="caption">खुशहाल ग्राहक</span>
+                  <span className=" text-xl font-semibold text-white">
+                    खुशहाल ग्राहक
+                  </span>
                 </div>
               </div>
             </div>

@@ -25,7 +25,7 @@ import { isAuthenticated } from "@/lib/handler";
 import TopBar from "@/components/TopBar";
 
 // Add a custom hook for counter animation
-const useCounter = (end: number, duration: number = 2000) => {
+export const useCounter = (end: number, duration: number = 2000) => {
   const [count, setCount] = useState(0);
   const countRef = useRef<HTMLSpanElement>(null);
   const observer = useRef<IntersectionObserver | null>(null);
