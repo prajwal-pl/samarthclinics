@@ -722,7 +722,7 @@ h5,
 
 .site-navbar .site-navigation .site-menu .has-children > a span:before {
   position: absolute;
-  content: "\e313";
+  content: "▼";
   font-size: 16px;
   top: 50%;
   right: 10px;
@@ -765,7 +765,7 @@ h5,
   bottom: 100%;
   left: 20%;
   border: solid transparent;
-  content: " ";
+  content: "  ";
   height: 0;
   width: 0;
   position: absolute;
@@ -838,7 +838,7 @@ h5,
   > a:after {
   position: absolute;
   right: 0;
-  content: "\e315";
+  content: "▼";
   right: 20px;
   font-family: "icomoon";
 }

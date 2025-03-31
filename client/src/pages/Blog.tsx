@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import Typed from "typed.js";
 import AOS from "aos";
+import TopBar from "@/components/TopBar";
 
 const Blog = () => {
   const typedRef = useRef<HTMLSpanElement>(null);
@@ -34,97 +35,7 @@ const Blog = () => {
 
   return (
     <div className="site-wrap">
-      <div className="site-mobile-menu">
-        <div className="site-mobile-menu-header">
-          <div className="site-mobile-menu-close mt-3">
-            <span className="icon-close2 js-menu-toggle"></span>
-          </div>
-        </div>
-        <div className="site-mobile-menu-body"></div>
-      </div>
-
-      <header className="site-navbar" role="banner">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-11 col-xl-4">
-              <h1 className="mb-0 site-logo">
-                <a href="index.html" className="text-white mb-0">
-                  समर्थ क्लिनिक<span className="text-primary">.</span>
-                </a>
-              </h1>
-              <p className="text-white mb-0" style={{ fontSize: "0.7rem" }}>
-                फिजियोथैरेपी रिहैबिलिटेशन सेंटर
-              </p>
-            </div>
-            <div className="col-12 col-md-8 d-none d-xl-block">
-              <nav
-                className="site-navigation position-relative text-right"
-                role="navigation"
-              >
-                <ul className="site-menu js-clone-nav mr-auto d-none d-lg-block">
-                  <li>
-                    <a href="/">
-                      <span>होम</span>
-                    </a>
-                  </li>
-                  <li className="has-children">
-                    <a href="/services">
-                      <span>सेवाएँ</span>
-                    </a>
-                    <ul className="dropdown arrow-top">
-                      <li>
-                        <a href="#">फिजियोथैरेपी</a>
-                      </li>
-                      <li>
-                        <a href="#">मालिश चिकित्सा</a>
-                      </li>
-                      <li>
-                        <a href="#">कायिक चिकित्सा</a>
-                      </li>
-                      <li className="has-children">
-                        <a href="#">ड्रॉपडाउन</a>
-                        <ul className="dropdown">
-                          {/*<li><a href="#">Physical Therapy</a></li>
-                          <li><a href="#">Massage Therapy</a></li>
-                          <li><a href="#">Chiropractic Therapy</a></li>*/}
-                        </ul>
-                      </li>
-                    </ul>
-                  </li>
-                  <li>
-                    <a href="/about">
-                      <span>हमारे बारे में</span>
-                    </a>
-                  </li>
-                  <li className="active">
-                    <a href="/blog">
-                      <span>ब्लॉग</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/contact">
-                      <span>संपर्क</span>
-                    </a>
-                  </li>
-                </ul>
-              </nav>
-            </div>
-
-            <div
-              className="d-inline-block d-xl-none ml-md-0 mr-auto py-3"
-              style={{ position: "relative", top: "3px" }}
-            >
-              <a
-                href="#"
-                className="site-menu-toggle js-menu-toggle text-white"
-              >
-                <span className="icon-menu h3"></span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </header>
-
+      <TopBar />
       <div
         className="site-blocks-cover overlay"
         style={{ backgroundImage: "url(images/hero_bg_11.webp)" }}
