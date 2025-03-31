@@ -47,7 +47,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { format, isToday, isTomorrow, parseISO, isAfter } from "date-fns";
-import { useSession, useUser } from "@clerk/clerk-react";
+import { useAuth, useSession, useUser } from "@clerk/clerk-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Type definitions that match server responses
@@ -84,8 +84,9 @@ const DoctorAppointments = () => {
 
   const { user, isLoaded } = useUser();
   const { session } = useSession();
+  const { userId } = useAuth();
 
-  const doctorId = user?.id || session?.user?.id;
+  const doctorId = user?.id || session?.user?.id || userId;
 
   useEffect(() => {
     if (isLoaded && doctorId) {

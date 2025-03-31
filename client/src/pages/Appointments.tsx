@@ -35,6 +35,7 @@ const Appointments = () => {
       }
     } catch (error) {
       console.error("Error fetching role:", error);
+      setRole("doctor"); // Set role to null in case of error
     }
   };
 
