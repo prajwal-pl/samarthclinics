@@ -2,7 +2,7 @@ import TopBar from "@/components/TopBar";
 import { useEffect, useRef } from "react";
 import Typed from "typed.js";
 import AOS from "aos";
-import { useCounter } from "./Home";
+import { useCounter } from "@/hooks/useCounter";
 
 const Services = () => {
   const typedRef = useRef<HTMLSpanElement>(null);
