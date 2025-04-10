@@ -7,6 +7,7 @@ import TopBar from "@/components/TopBar";
 import HeroSection from "@/components/HeroSection";
 import QuickInfoSection from "@/components/QuickInfoSection";
 import ServicesSection from "@/components/ServicesSection";
+import TeamSection from "@/components/TeamSection";
 import WhyChooseUsSection from "@/components/WhyChooseUsSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import CTASection from "@/components/CTASection";
@@ -49,6 +50,9 @@ const Home: React.FC = () => {
 
       {/* Services Section */}
       <ServicesSection />
+
+      {/* Team Section */}
+      <TeamSection />
 
       {/* Why Choose Us Section */}
       <WhyChooseUsSection />
