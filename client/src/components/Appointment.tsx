@@ -36,6 +36,7 @@ const Appointment = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState("");
   const [issue, setIssue] = useState("");
+  const [visitType, setVisitType] = useState<"clinic" | "home">("clinic");
   const [isSlotAvailable, setIsSlotAvailable] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -121,8 +122,11 @@ const Appointment = () => {
           time: selectedTime,
           user,
           issue,
+          visitType,
         }
       );
+
+      console.log(response.data);
 
       if (response.status === 201) {
         toast("Appointment booked successfully", {
@@ -146,10 +150,10 @@ const Appointment = () => {
   };
 
   return (
-    <div className="max-w-5xl h-auto mx-auto py-12 px-6">
-      <h1 className="text-4xl font-bold mb-10 text-center text-primary">
+    <div className="max-w-5xl h-auto mx-auto  px-6">
+      {/* <h1 className="text-4xl font-bold mb-10 text-center text-primary">
         Book Your Physiotherapy Appointment
-      </h1>
+      </h1> */}
 
       {successMessage && (
         <Alert className="mb-6 bg-green-50 border-green-200 shadow-sm">
@@ -174,30 +178,36 @@ const Appointment = () => {
       )}
 
       <Card className="shadow-md border-t-4 border-t-primary">
-        <CardHeader className="pb-4 flex justify-between items-center">
-          <div>
-            <CardTitle className="text-2xl text-primary">
-              Appointment Details
-            </CardTitle>
-            <CardDescription className="text-base">
-              Fill in the details to book your appointment with our specialists
-            </CardDescription>
-          </div>
-          <div>
-            <Button
-              onClick={() => {
-                window.location.href = "/";
-              }}
-              className="rounded"
-            >
-              Go Back
-            </Button>
-          </div>
+        <CardHeader>
+          <CardTitle className="text-2xl text-primary">
+            Appointment Details
+          </CardTitle>
+          <CardDescription className="text-base">
+            Fill in the details to book your appointment with our specialists
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-7">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-5">
+                <div>
+                  <Label>Visit Type</Label>
+                  <Select
+                    value={visitType}
+                    onValueChange={(value) =>
+                      setVisitType(value as "clinic" | "home")
+                    }
+                    required
+                  >
+                    <SelectTrigger className="h-11 border-slate-300 hover:border-primary focus:ring-1 focus:ring-primary">
+                      <SelectValue placeholder="Select where to visit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="clinic">Clinic Visit</SelectItem>
+                      <SelectItem value="home">Home Visit</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div>
                   <Label
                     htmlFor="doctor"

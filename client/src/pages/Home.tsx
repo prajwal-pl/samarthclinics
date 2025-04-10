@@ -14,6 +14,7 @@ import Footer from "@/components/Footer";
 import Map from "@/components/Map";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
+import Appointments from "./Appointments";
 
 const Home: React.FC = () => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -43,6 +44,8 @@ const Home: React.FC = () => {
 
       {/* Quick Info Section */}
       <QuickInfoSection />
+
+      <Appointments />
 
       {/* Services Section */}
       <ServicesSection />

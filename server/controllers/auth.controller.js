@@ -39,9 +39,10 @@ export const getBasicUserInfo = async (req, res) => {
         phoneNumber,
         role: "user",
         full_name,
+        clerkId: "",
       });
 
-      newUser
+      await newUser
         .save()
         .then((savedUser) => {
           res.status(201).json(savedUser);

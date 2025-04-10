@@ -39,61 +39,63 @@ const DataForm = () => {
       toast.success("User Authenticated successfully");
       localStorage.setItem("email", values.email);
       localStorage.setItem("userId", res._id);
-      window.location.href = "/appointments";
+      window.location.reload();
     });
   }
 
   return (
-    <div className="flex flex-col gap-3 items-center justify-center h-screen w-full">
-      <h1 className="text-2xl font-bold">Enter Your Details</h1>
-      <div className="space-y-4 w-[400px]">
+    <div className="flex flex-col gap-3 items-center justify-center w-full py-4">
+      <h1 className="text-xl font-semibold mb-2">Enter Your Details</h1>
+      <div className="space-y-4 w-full">
         <Form {...form}>
-          <FormField
-            control={form.control}
-            name="full_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Full Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your Full Name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your Email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="phoneNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone Number</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your Phone Number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="space-y-3">
+            <FormField
+              control={form.control}
+              name="full_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your Full Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your Email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="phoneNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your Phone Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </Form>
         <Button
-          className="w-full rounded"
+          className="w-full rounded mt-2"
           type="submit"
           onClick={form.handleSubmit(onSubmit)}
         >
-          Next <ChevronRightCircle />
+          Next <ChevronRightCircle className="ml-2 h-5 w-5" />
         </Button>
       </div>
     </div>

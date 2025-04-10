@@ -64,7 +64,7 @@ export const GetBooking = async (req, res) => {
 };
 
 export const CreateBooking = async (req, res) => {
-  const { date, time, user, doctor, issue } = req.body;
+  const { date, time, user, doctor, issue, visitType } = req.body;
 
   const newBooking = new Booking({
     date,
@@ -72,6 +72,7 @@ export const CreateBooking = async (req, res) => {
     user,
     doctor,
     issue,
+    visitType,
   });
 
   try {

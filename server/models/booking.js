@@ -12,6 +12,11 @@ const BookingSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    visitType: {
+      type: String,
+      enum: ["clinic", "home"],
+      default: "clinic",
+    },
     date: {
       type: Date,
       required: true,
